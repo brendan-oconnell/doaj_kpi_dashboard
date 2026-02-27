@@ -53,6 +53,35 @@ def build_session() -> requests.Session:
     return session
 
 
+def get_most_recent_article_date(session: requests.Session, issn: Optional[str]) -> Optional[str]:
+    """Query DOAJ API to get the most recent article update date for a journal by ISSN."""
+    if not issn or not issn.strip():
+        return None
+    
+    try:
+        # Search articles by journal ISSN, get the most recent one
+        from urllib.parse import quote
+        import time
+        search_query = f'issn:"{issn.strip()}"'
+        url = f'https://doaj.org/api/v3/search/articles/{quote(search_query)}'
+        
+        response = session.get(url, params={'pageSize': 1}, timeout=5)
+        # Rate limit: add small delay to avoid overwhelming the API
+        time.sleep(0.05)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('results') and len(data['results']) > 0:
+                article = data['results'][0]
+                # Return the last_updated date of the most recent article
+                return article.get('last_updated')
+    except Exception:
+        # Silently fail - article data is not critical
+        pass
+    
+    return None
+
+
 def normalize_header(value: str) -> str:
     return "".join(ch.lower() for ch in value if ch.isalnum())
 
@@ -736,6 +765,20 @@ def main() -> int:
     print(f"Downloading CSV from {CSV_URL}", file=sys.stderr)
     records, headers, response_meta = load_csv_records(session)
     print(f"Fetched {len(records)} journal rows from CSV", file=sys.stderr)
+
+    # Query article API to get most recent article update date for each journal
+    print("Fetching article metadata...", file=sys.stderr)
+    for idx, record in enumerate(records, start=1):
+        if idx % 100 == 0:
+            print(f"  Processed {idx}/{len(records)} journals", file=sys.stderr)
+        
+        # Try both eissn and pissn
+        issn = record.get("eissn") or record.get("pissn")
+        if issn:
+            most_recent = get_most_recent_article_date(session, issn)
+            record["most_recent_article_date"] = most_recent
+
+    print(f"Finished fetching article metadata", file=sys.stderr)
 
     aggregates = aggregate(records)
     fetched_at = datetime.now(timezone.utc).isoformat()

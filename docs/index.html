@@ -133,6 +133,7 @@
     .country-subject-name { color: var(--text); }
     .country-subject-pill { padding: 3px 8px; border-radius: 999px; background: rgba(253, 90, 59, 0.14); color: #982E0A; font-size: 12px; font-weight: 700; }
     .charts { display: grid; gap: 14px; padding: 0 28px; }
+    .charts.regional-charts { display: grid; gap: 14px; padding: 20px 28px; }
     .chart-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .chart-row.single { grid-template-columns: 1fr; }
     @media (max-width: 1200px) {
@@ -181,6 +182,118 @@
       border-radius: 8px;
     }
     #chart-apc-distribution { width: 100%; }
+    .regional-stats {
+      display: flex;
+      justify-content: space-around;
+      gap: 12px;
+      padding: 8px 4px;
+      margin-bottom: 8px;
+      background: var(--bg);
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .stat-label.with-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted var(--muted);
+    }
+    .stat-label.with-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #282624;
+      color: #FFFFFF;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 400;
+      white-space: normal;
+      width: 180px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .stat-label.with-tooltip::before {
+      content: '';
+      position: absolute;
+      bottom: 114%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #282624;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 1001;
+    }
+    .stat-label.with-tooltip:hover::after,
+    .stat-label.with-tooltip:hover::before {
+      opacity: 1;
+    }
+    .tooltip-icon {
+      position: relative;
+      cursor: help;
+      font-size: 12px;
+      color: #A89968;
+      margin-left: 4px;
+    }
+    .tooltip-icon[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #282624;
+      color: #FFFFFF;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 400;
+      white-space: normal;
+      width: 180px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .tooltip-icon[data-tooltip]::before {
+      content: '';
+      position: absolute;
+      bottom: 114%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #282624;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 1001;
+    }
+    .tooltip-icon[data-tooltip]:hover::after,
+    .tooltip-icon[data-tooltip]:hover::before {
+      opacity: 1;
+    }
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+    }
     .chart-box.map-box { min-height: 500px; }
     .map-shell { position: relative; }
     .map-plot { min-height: 460px; width: 100%; }
@@ -437,6 +550,47 @@
     <div class="card"><div class="label"><span class="icon-chip muted"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M8 12h5m2 0 2-2"/><path d="M5 5l14 14"/></svg></span>No APC</div><div class="value" id="kpi-no-apc">–</div></div>
   </div>
 
+  <div class="charts regional-charts">
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Latin America: Growth in journals</div>
+        <div class="regional-stats" id="stats-latin-america">
+          <div class="stat-item"><span class="stat-label">Current journals:</span><span class="stat-value" id="latin-america-total">–</span></div>
+          <div class="stat-item"><span class="stat-label">Journals added YTD 2026:</span><span class="stat-value" id="latin-america-ytd">–</span></div>
+          <div class="stat-item"><span class="stat-label with-tooltip" data-tooltip="Percent increase in total journals listed in DOAJ, comparing the last two full calendar years.">YoY increase:</span><span class="stat-value" id="latin-america-yoy">–</span></div>
+        </div>
+        <div class="chart-content" id="chart-latin-america"></div>
+      </div>
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Africa: Growth in journals</div>
+        <div class="regional-stats" id="stats-africa">
+          <div class="stat-item"><span class="stat-label">Current journals:</span><span class="stat-value" id="africa-total">–</span></div>
+          <div class="stat-item"><span class="stat-label">Journals added YTD 2026:</span><span class="stat-value" id="africa-ytd">–</span></div>
+          <div class="stat-item"><span class="stat-label with-tooltip" data-tooltip="Percent increase in total journals listed in DOAJ, comparing the last two full calendar years.">YoY increase:</span><span class="stat-value" id="africa-yoy">–</span></div>
+        </div>
+        <div class="chart-content" id="chart-africa"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts regional-charts">
+    <div class="chart-row single">
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>No-fee journals by year <span class="tooltip-icon" data-tooltip="Journals with no article processing charges (APC). Note: based on apc_has field only, as has_other_charges is not available in our data export.">ⓘ</span></div>
+        <div class="chart-content" id="chart-no-fee-timeline"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts regional-charts">
+    <div class="chart-row single">
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Journals with article metadata</div>
+        <div class="chart-content" id="chart-article-metadata"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="layout">
     <div class="panel filters">
       <h3>Filters</h3>
@@ -572,9 +726,9 @@
           <div class="chart-content" id="chart-timeline"></div>
         </div>
       </div>
-      <div class="chart-row single">
-        <div class="chart-box apc-country-box">
-          <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 19h14"/><path d="M8 16v-5M12 19V8M16 19v-7"/><path d="M11 5h4M13 3v4"/></svg></span>Top 20 countries by APC amount</div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Top 20 countries by APC amount</div>
           <div class="apc-country-control">
             <div class="apc-country-control-group">
               <label for="apc-country-continent">Continent</label>
@@ -1187,6 +1341,214 @@
       if (direct !== 'Other') return direct;
       const formatted = formatCountry(country);
       return getContinent(formatted);
+    }
+
+    const LATIN_AMERICA_COUNTRIES = new Set([
+      'Argentina', 'Aruba', 'Antigua and Barbuda', 'Bahamas, The', 'Barbados',
+      'Belize', 'Bolivia', 'Brazil', 'Cayman Islands', 'Chile', 'Colombia',
+      'Costa Rica', 'Cuba', 'Dominica', 'Dominican Republic', 'Ecuador',
+      'El Salvador', 'Grenada', 'Guyana', 'Guatemala', 'Haiti', 'Honduras',
+      'Jamaica', 'Mexico', 'Nicaragua', 'Panama', 'Paraguay', 'Peru',
+      'Puerto Rico', 'St. Kitts and Nevis', 'St. Lucia', 'Suriname',
+      'St. Vincent and the Grenadines', 'Trinidad and Tobago',
+      'Turks and Caicos Islands', 'Uruguay', 'Venezuela',
+      'Venezuela, Bolivarian Republic of',
+      'British Virgin Islands', 'Virgin Islands (U.S.)', 'Saint Maarten (Dutch part)'
+    ]);
+
+    const AFRICA_COUNTRIES = new Set([
+      'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi',
+      'Cabo Verde', 'Cameroon', 'Central African Republic', 'Chad', 'Comoros',
+      'Congo, Democratic Republic of the', 'Congo, Republic of the', "Cote d'Ivoire",
+      'Djibouti', 'Egypt', 'Equatorial Guinea', 'Eritrea', 'Eswatini', 'Ethiopia',
+      'Gabon', 'Gambia', 'Ghana', 'Guinea', 'Guinea-Bissau', 'Kenya', 'Lesotho',
+      'Liberia', 'Libya', 'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mauritius',
+      'Morocco', 'Mozambique', 'Namibia', 'Niger', 'Nigeria', 'Rwanda',
+      'Sao Tome and Principe', 'Senegal', 'Seychelles', 'Sierra Leone', 'Somalia',
+      'South Africa', 'South Sudan', 'Sudan', 'Tanzania', 'Togo', 'Tunisia',
+      'Uganda', 'Zambia', 'Zimbabwe'
+    ]);
+
+    function isLatinAmerica(country) {
+      return country && LATIN_AMERICA_COUNTRIES.has(country);
+    }
+
+    function isAfrica(country) {
+      return country && AFRICA_COUNTRIES.has(country);
+    }
+
+    function buildRegionalTimeline(records, regionFilter) {
+      const yearCounts = {};
+      let minYear = null;
+      let maxYear = null;
+
+      for (const record of records || []) {
+        if (!record || !record.country || !record.created_date) continue;
+        const isInRegion = regionFilter(record.country);
+        if (!isInRegion) continue;
+        
+        const year = new Date(record.created_date).getUTCFullYear();
+        if (Number.isNaN(year)) continue;
+        
+        yearCounts[year] = (yearCounts[year] || 0) + 1;
+        if (minYear === null || year < minYear) minYear = year;
+        if (maxYear === null || year > maxYear) maxYear = year;
+      }
+
+      if (minYear === null || maxYear === null) {
+        return { years: [], counts: [], cumulativeCounts: [], totalJournals: 0, yoyIncrease: null, ytd2026: 0 };
+      }
+
+      const years = [];
+      const counts = [];
+      const cumulativeCounts = [];
+      let totalJournals = 0;
+      let runningTotal = 0;
+      
+      // Build data up to 2025 only (exclude 2026)
+      let maxYearForChart = Math.min(maxYear, 2025);
+      for (let year = minYear; year <= maxYearForChart; year++) {
+        years.push(year);
+        const count = yearCounts[year] || 0;
+        counts.push(count);
+        runningTotal += count;
+        cumulativeCounts.push(runningTotal);
+        totalJournals += count;
+      }
+
+      // Add 2026 data to total but don't show in chart
+      const year2026Count = yearCounts[2026] || 0;
+      totalJournals += year2026Count;
+
+      // Calculate YoY increase comparing total journals listed at end of 2024 vs end of 2025
+      let yoyIncrease = null;
+      
+      // Find cumulative totals for 2024 and 2025
+      let cumulative2024 = 0;
+      let cumulative2025 = 0;
+      let runningTotalCheck = 0;
+      
+      for (let year = minYear; year <= 2025; year++) {
+        const count = yearCounts[year] || 0;
+        runningTotalCheck += count;
+        if (year === 2024) {
+          cumulative2024 = runningTotalCheck;
+        }
+        if (year === 2025) {
+          cumulative2025 = runningTotalCheck;
+        }
+      }
+      
+      if (cumulative2024 > 0) {
+        yoyIncrease = (((cumulative2025 - cumulative2024) / cumulative2024) * 100).toFixed(1);
+      }
+
+      return { years, counts, cumulativeCounts, totalJournals, yoyIncrease, ytd2026: year2026Count };
+    }
+
+    function buildNoFeeTimeline(records) {
+      const yearTotalCounts = {};
+      const yearNoFeeCounts = {};
+      let minYear = null;
+      let maxYear = null;
+
+      for (const record of records || []) {
+        if (!record || !record.created_date) continue;
+        
+        const year = new Date(record.created_date).getUTCFullYear();
+        if (Number.isNaN(year)) continue;
+        
+        yearTotalCounts[year] = (yearTotalCounts[year] || 0) + 1;
+        
+        // Check if journal has no APC
+        if (record.apc_has === false) {
+          yearNoFeeCounts[year] = (yearNoFeeCounts[year] || 0) + 1;
+        }
+        
+        if (minYear === null || year < minYear) minYear = year;
+        if (maxYear === null || year > maxYear) maxYear = year;
+      }
+
+      if (minYear === null || maxYear === null) {
+        return { years: [], totalCounts: [], noFeeCounts: [], annualTotalAdditions: [], annualNoFeeAdditions: [] };
+      }
+
+      const years = [];
+      const totalCounts = [];
+      const noFeeCounts = [];
+      const annualTotalAdditions = [];
+      const annualNoFeeAdditions = [];
+      
+      // Build data up to 2025 only (exclude 2026)
+      let maxYearForChart = Math.min(maxYear, 2025);
+      let cumulativeTotal = 0;
+      let cumulativeNoFee = 0;
+      for (let year = minYear; year <= maxYearForChart; year++) {
+        years.push(year);
+        const totalCount = yearTotalCounts[year] || 0;
+        const noFeeCount = yearNoFeeCounts[year] || 0;
+        annualTotalAdditions.push(totalCount);
+        annualNoFeeAdditions.push(noFeeCount);
+        cumulativeTotal += totalCount;
+        cumulativeNoFee += noFeeCount;
+        totalCounts.push(cumulativeTotal);
+        noFeeCounts.push(cumulativeNoFee);
+      }
+
+      return { years, totalCounts, noFeeCounts, annualTotalAdditions, annualNoFeeAdditions };
+    }
+
+    function buildArticleMetadataTimeline(records) {
+      let minYear = null;
+      let maxYear = null;
+      const yearCreatedCounts = {};
+      const yearWithArticlesCounts = {};
+
+      // Count journals created each year and those with article records
+      for (const record of records || []) {
+        if (!record || !record.created_date) continue;
+        
+        const year = new Date(record.created_date).getUTCFullYear();
+        if (Number.isNaN(year)) continue;
+        
+        if (minYear === null || year < minYear) minYear = year;
+        if (maxYear === null || year > maxYear) maxYear = year;
+      }
+
+      if (minYear === null || maxYear === null) {
+        return { years: [], percentages: [] };
+      }
+
+      const years = [];
+      const percentages = [];
+      
+      // For each year up to 2025, calculate percentage of journals created by that year with article records
+      let maxYearForChart = Math.min(maxYear, 2025);
+      for (let year = minYear; year <= maxYearForChart; year++) {
+        years.push(year);
+        
+        // Count all journals created in year or earlier
+        let journalsCreatedByYear = 0;
+        let journalsWithArticles = 0;
+        
+        for (const record of records || []) {
+          if (!record || !record.created_date) continue;
+          const recordYear = new Date(record.created_date).getUTCFullYear();
+          
+          if (recordYear <= year) {
+            journalsCreatedByYear++;
+            const articles = getArticleRecords(record);
+            if (articles !== null && articles > 0) {
+              journalsWithArticles++;
+            }
+          }
+        }
+        
+        const percentage = journalsCreatedByYear > 0 ? ((journalsWithArticles / journalsCreatedByYear) * 100).toFixed(1) : 0;
+        percentages.push(percentage);
+      }
+
+      return { years, percentages };
     }
 
     function getCreatedYear(record) {
@@ -2342,6 +2704,184 @@
         );
       }
 
+      // Render Latin America regional chart
+      const laData = buildRegionalTimeline(state.filtered, isLatinAmerica);
+      document.getElementById('latin-america-total').textContent = laData.totalJournals > 0 ? formatNumber(laData.totalJournals) : '–';
+      document.getElementById('latin-america-ytd').textContent = laData.ytd2026 > 0 ? formatNumber(laData.ytd2026) : '–';
+      document.getElementById('latin-america-yoy').textContent = laData.yoyIncrease !== null ? `${laData.yoyIncrease}%` : '–';
+      
+      if (!laData.years.length) {
+        renderNoDataChart('chart-latin-america', 'Latin America: Growth in journals');
+      } else {
+        Plotly.newPlot(
+          'chart-latin-america',
+          [{
+            type: 'bar',
+            name: 'Cumulative journals',
+            x: laData.years,
+            y: laData.cumulativeCounts,
+            customdata: laData.counts,
+            marker: { color: '#47A178' },
+            hovertemplate: 'Year %{x}<br>Journals added: %{customdata:,d}<br>Cumulative total: %{y:,d}<extra></extra>'
+          }],
+          {
+            title: 'Latin America: Growth in journals',
+            margin: { l: 52, r: 44, t: 46, b: 58 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#282624' },
+            xaxis: { tickformat: 'd' },
+            yaxis: {
+              tickformat: ',d',
+              separatethousands: true,
+              range: [0, Math.max(...laData.cumulativeCounts, 1) * 1.15]
+            }
+          },
+          { displayModeBar: false }
+        );
+      }
+
+      // Render Africa regional chart
+      const afData = buildRegionalTimeline(state.filtered, isAfrica);
+      document.getElementById('africa-total').textContent = afData.totalJournals > 0 ? formatNumber(afData.totalJournals) : '–';
+      document.getElementById('africa-ytd').textContent = afData.ytd2026 > 0 ? formatNumber(afData.ytd2026) : '–';
+      document.getElementById('africa-yoy').textContent = afData.yoyIncrease !== null ? `${afData.yoyIncrease}%` : '–';
+      
+      if (!afData.years.length) {
+        renderNoDataChart('chart-africa', 'Africa: Growth in journals');
+      } else {
+        Plotly.newPlot(
+          'chart-africa',
+          [{
+            type: 'bar',
+            name: 'Cumulative journals',
+            x: afData.years,
+            y: afData.cumulativeCounts,
+            customdata: afData.counts,
+            marker: { color: '#FA9A87' },
+            hovertemplate: 'Year %{x}<br>Journals added: %{customdata:,d}<br>Cumulative total: %{y:,d}<extra></extra>'
+          }],
+          {
+            title: 'Africa: Growth in journals',
+            margin: { l: 52, r: 44, t: 46, b: 58 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#282624' },
+            xaxis: { tickformat: 'd' },
+            yaxis: {
+              tickformat: ',d',
+              separatethousands: true,
+              range: [0, Math.max(...afData.cumulativeCounts, 1) * 1.15]
+            }
+          },
+          { displayModeBar: false }
+        );
+      }
+
+      // Render no-fee journals timeline
+      const noFeeData = buildNoFeeTimeline(state.filtered);
+      
+      if (!noFeeData.years.length) {
+        renderNoDataChart('chart-no-fee-timeline', 'No-fee journals by year');
+      } else {
+        const maxYValue = Math.max(...noFeeData.totalCounts, 1);
+        Plotly.newPlot(
+          'chart-no-fee-timeline',
+          [{
+            type: 'bar',
+            name: 'Journals with fees',
+            x: noFeeData.years,
+            y: noFeeData.totalCounts.map((total, idx) => total - noFeeData.noFeeCounts[idx]),
+            customdata: noFeeData.annualTotalAdditions.map((total, idx) => {
+              const cumulativeTotal = noFeeData.totalCounts[idx];
+              const cumulativeNoFee = noFeeData.noFeeCounts[idx];
+              const noFeePercent = cumulativeTotal > 0 ? ((cumulativeNoFee / cumulativeTotal) * 100).toFixed(1) : 0;
+              return {
+                annualTotal: total,
+                annualNoFee: noFeeData.annualNoFeeAdditions[idx],
+                annualFees: total - noFeeData.annualNoFeeAdditions[idx],
+                noFeePercent: noFeePercent,
+                cumulativeTotal: cumulativeTotal,
+                cumulativeNoFee: cumulativeNoFee
+              };
+            }),
+            marker: { color: '#FD5A3B' },
+            hovertemplate: 'Year %{x}<br>Journals added with fees: %{customdata.annualFees:,d}<br>Cumulative total with fees: %{y:,d}<br>No-fee journals: %{customdata.noFeePercent}% of %{customdata.cumulativeTotal:,d}<extra></extra>'
+          }, {
+            type: 'bar',
+            name: 'No-fee journals',
+            x: noFeeData.years,
+            y: noFeeData.noFeeCounts,
+            customdata: noFeeData.annualNoFeeAdditions.map((annual, idx) => {
+              const cumulativeTotal = noFeeData.totalCounts[idx];
+              const cumulativeNoFee = noFeeData.noFeeCounts[idx];
+              const noFeePercent = cumulativeTotal > 0 ? ((cumulativeNoFee / cumulativeTotal) * 100).toFixed(1) : 0;
+              return {
+                annual: annual,
+                noFeePercent: noFeePercent,
+                cumulativeNoFee: cumulativeNoFee,
+                cumulativeTotal: cumulativeTotal
+              };
+            }),
+            marker: { color: '#47A178' },
+            hovertemplate: 'Year %{x}<br>No-fee journals added: %{customdata.annual:,d}<br>Cumulative no-fee total: %{y:,d}<br>%{customdata.noFeePercent}% of %{customdata.cumulativeTotal:,d} total<extra></extra>'
+          }],
+          {
+            title: 'No-fee journals by year',
+            barmode: 'stack',
+            margin: { l: 52, r: 44, t: 46, b: 58 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#282624' },
+            xaxis: { tickformat: 'd' },
+            yaxis: {
+              tickformat: ',d',
+              separatethousands: true,
+              range: [0, maxYValue * 1.15]
+            },
+            legend: { orientation: 'h', x: 0, y: -0.22 }
+          },
+          { displayModeBar: false }
+        );
+      }
+
+      // Render article metadata timeline
+      const articleMetadataData = buildArticleMetadataTimeline(state.filtered);
+      
+      if (!articleMetadataData.years.length) {
+        renderNoDataChart('chart-article-metadata', 'Journals with article metadata');
+      } else {
+        Plotly.newPlot(
+          'chart-article-metadata',
+          [{
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Journals with article metadata',
+            x: articleMetadataData.years,
+            y: articleMetadataData.percentages.map(p => parseFloat(p)),
+            line: { color: '#47A178', width: 3 },
+            marker: { size: 8, color: '#47A178' },
+            fill: 'tozeroy',
+            fillcolor: 'rgba(71, 161, 120, 0.2)',
+            hovertemplate: 'Year %{x}<br>%{y:.1f}% with article metadata<extra></extra>'
+          }],
+          {
+            title: 'Journals with article metadata',
+            margin: { l: 52, r: 44, t: 46, b: 58 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#282624' },
+            xaxis: { tickformat: 'd' },
+            yaxis: {
+              tickformat: '.1f',
+              suffix: '%',
+              range: [0, 100]
+            }
+          },
+          { displayModeBar: false }
+        );
+      }
+
       const apcContinent = (document.getElementById('apc-country-continent') || {}).value || '';
       const apcCurrency = getSelectedApcCurrency();
       const apcCountryScaleStats = getApcCountryStats(state.records, apcCurrency);
@@ -2429,9 +2969,26 @@
         ['chart-pid', 'Top 5 Persistent Identifiers'],
         ['chart-preservation', 'Top 5 Preservation Services'],
         ['chart-publishers', 'Top 10 publishers'],
-        ['chart-timeline', 'Timeline of journals added to DOAJ (monthly)']
+        ['chart-timeline', 'Timeline of journals added to DOAJ (monthly)'],
+        ['chart-latin-america', 'Latin America: Growth in journals'],
+        ['chart-africa', 'Africa: Growth in journals']
       ];
       emptyCharts.forEach(([id, title]) => renderHorizontalBarChart(id, title, []));
+      
+      // Clear no-fee chart
+      renderNoDataChart('chart-no-fee-timeline', 'No-fee journals by year');
+      
+      // Clear article metadata chart
+      renderNoDataChart('chart-article-metadata', 'Journals with article metadata');
+      
+      // Clear regional stats
+      document.getElementById('latin-america-total').textContent = '–';
+      document.getElementById('latin-america-ytd').textContent = '–';
+      document.getElementById('latin-america-yoy').textContent = '–';
+      document.getElementById('africa-total').textContent = '–';
+      document.getElementById('africa-ytd').textContent = '–';
+      document.getElementById('africa-yoy').textContent = '–';
+      
       const apcCurrency = getSelectedApcCurrency();
       renderApcCountryChart(
         'chart-apc-distribution',
