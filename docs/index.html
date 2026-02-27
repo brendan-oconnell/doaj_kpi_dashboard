@@ -661,7 +661,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Journals uploading article metadata <span class="tooltip-icon" data-tooltip="Percentage of journals whose most recent article upload was in the previous calendar year. For example, 2025 shows journals that last uploaded in 2024.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Journals with recent article uploads <span class="tooltip-icon" data-tooltip="Percentage of journals that have uploaded article metadata recently (2025 or later). Shows current adoption level at each point in time.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -1596,14 +1596,14 @@
       const years = [];
       const percentages = [];
       
-      // For each year, calculate percentage of journals that uploaded in the PREVIOUS year
+      // For each year, calculate percentage of journals with recent article uploads (2025+)
       let maxYearForChart = Math.min(maxYear, 2025);
       for (let year = minYear; year <= maxYearForChart; year++) {
         years.push(year);
         
-        // Count journals that existed by this year and those that uploaded in the previous year
+        // Count journals that existed by this year and those with recent uploads
         let journalsExistingByYear = 0;
-        let journalsUploadedInPreviousYear = 0;
+        let journalsWithRecentUploads = 0;
         
         for (const record of records || []) {
           if (!record || !record.created_date) continue;
@@ -1613,20 +1613,20 @@
           if (recordYear <= year) {
             journalsExistingByYear++;
             
-            // Check if journal's most recent upload was in the previous year
+            // Check if journal uploaded articles recently (2025 or later)
             if (record.most_recent_article_date) {
               const articleDate = new Date(record.most_recent_article_date);
               const articleYear = articleDate.getUTCFullYear();
               
-              // Count if most recent upload was in year - 1
-              if (articleYear === year - 1) {
-                journalsUploadedInPreviousYear++;
+              // Count if most recent upload was in 2025 or 2026
+              if (articleYear >= 2025) {
+                journalsWithRecentUploads++;
               }
             }
           }
         }
         
-        const percentage = journalsExistingByYear > 0 ? ((journalsUploadedInPreviousYear / journalsExistingByYear) * 100).toFixed(1) : 0;
+        const percentage = journalsExistingByYear > 0 ? ((journalsWithRecentUploads / journalsExistingByYear) * 100).toFixed(1) : 0;
         percentages.push(percentage);
       }
 
