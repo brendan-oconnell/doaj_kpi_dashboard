@@ -2,11 +2,11 @@
 # Code license: PolyForm Noncommercial 1.0.0
 # https://polyformproject.org/licenses/noncommercial/1.0.0/
 # See LICENSE and LICENSE-CODE.md
-name: Fetch DOAJ journals (hourly)
+name: Fetch DOAJ journals (monthly)
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 0 1 * *"
   workflow_dispatch:
   push:
     branches:

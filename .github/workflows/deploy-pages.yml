@@ -15,7 +15,7 @@ on:
       - ".github/workflows/fetch-journals.yml"
   workflow_run:
     workflows:
-      - "Fetch DOAJ journals (hourly)"
+      - "Fetch DOAJ journals (monthly)"
     types:
       - completed
 
