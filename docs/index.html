@@ -661,7 +661,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Article metadata uploads in 2025 <span class="tooltip-icon" data-tooltip="Percentage of DOAJ journals whose most recent article metadata upload was in 2025.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Article metadata uploads in last 365 days <span class="tooltip-icon" data-tooltip="Percentage of DOAJ journals whose most recent article metadata upload was within the last 365 days.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -1575,7 +1575,11 @@
     }
 
     function buildArticleMetadataTimeline(records) {
-      let uploadedIn2025 = 0;
+      const today = new Date();
+      const oneYearAgo = new Date(today);
+      oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+      
+      let uploadedInLast365Days = 0;
       let total = 0;
       
       for (const record of records || []) {
@@ -1584,20 +1588,19 @@
         
         if (record.most_recent_article_date) {
           const articleDate = new Date(record.most_recent_article_date);
-          const articleYear = articleDate.getUTCFullYear();
           
-          if (articleYear === 2025) {
-            uploadedIn2025++;
+          if (articleDate >= oneYearAgo) {
+            uploadedInLast365Days++;
           }
         }
       }
       
-      const percentage = total > 0 ? ((uploadedIn2025 / total) * 100).toFixed(1) : 0;
+      const percentage = total > 0 ? ((uploadedInLast365Days / total) * 100).toFixed(1) : 0;
       const percentageNo = (100 - percentage).toFixed(1);
       
       return {
-        uploadedIn2025: percentage,
-        notUploadedIn2025: percentageNo,
+        uploadedRecently: percentage,
+        notUploadedRecently: percentageNo,
         total: total
       };
     }
@@ -2908,31 +2911,31 @@
             {
               type: 'bar',
               orientation: 'h',
-              x: [parseFloat(articleMetadataData.uploadedIn2025)],
-              y: ['2025'],
+              x: [parseFloat(articleMetadataData.uploadedRecently)],
+              y: ['Last 365 days'],
               name: 'Yes',
               marker: { color: '#47A178' },
-              text: [articleMetadataData.uploadedIn2025 + '%'],
+              text: [articleMetadataData.uploadedRecently + '%'],
               textposition: 'inside',
               textfont: { color: 'white' },
-              hovertemplate: '%{x:.1f}% uploaded in 2025<extra></extra>'
+              hovertemplate: '%{x:.1f}% uploaded in last 365 days<extra></extra>'
             },
             {
               type: 'bar',
               orientation: 'h',
-              x: [parseFloat(articleMetadataData.notUploadedIn2025)],
-              y: ['2025'],
+              x: [parseFloat(articleMetadataData.notUploadedRecently)],
+              y: ['Last 365 days'],
               name: 'No',
               marker: { color: '#FD5A3B' },
-              text: [articleMetadataData.notUploadedIn2025 + '%'],
+              text: [articleMetadataData.notUploadedRecently + '%'],
               textposition: 'inside',
               textfont: { color: 'white' },
-              hovertemplate: '%{x:.1f}% did not upload in 2025<extra></extra>'
+              hovertemplate: '%{x:.1f}% did not upload in last 365 days<extra></extra>'
             }
           ],
           {
             barmode: 'stack',
-            margin: { l: 60, r: 44, t: 20, b: 44 },
+            margin: { l: 100, r: 44, t: 20, b: 44 },
             paper_bgcolor: 'rgba(0,0,0,0)',
             plot_bgcolor: 'rgba(0,0,0,0)',
             font: { color: '#282624' },
