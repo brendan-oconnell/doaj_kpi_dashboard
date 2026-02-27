@@ -661,7 +661,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Article metadata uploads in last 365 days <span class="tooltip-icon" data-tooltip="Percentage of DOAJ journals whose most recent article metadata upload was within the last 365 days.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals with updated article metadata in last year <span class="tooltip-icon" data-tooltip="Percentage of DOAJ journals whose most recent article metadata upload was within the last 365 days.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -2912,7 +2912,7 @@
               type: 'bar',
               orientation: 'h',
               x: [parseFloat(articleMetadataData.uploadedRecently)],
-              y: ['Last 365 days'],
+              y: [''],
               name: 'Yes',
               marker: { color: '#47A178' },
               text: [articleMetadataData.uploadedRecently + '%'],
@@ -2924,7 +2924,7 @@
               type: 'bar',
               orientation: 'h',
               x: [parseFloat(articleMetadataData.notUploadedRecently)],
-              y: ['Last 365 days'],
+              y: [''],
               name: 'No',
               marker: { color: '#FD5A3B' },
               text: [articleMetadataData.notUploadedRecently + '%'],
