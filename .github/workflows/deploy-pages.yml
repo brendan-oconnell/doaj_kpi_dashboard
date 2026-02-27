@@ -36,6 +36,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate config with secret
+        run: |
+          mkdir -p docs
+          echo "window.DASHBOARD_PASSWORD = '${{ secrets.DASHBOARD_PASSWORD }}';" > docs/config.js
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
