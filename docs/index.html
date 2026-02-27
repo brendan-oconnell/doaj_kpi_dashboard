@@ -661,7 +661,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Journals with article metadata</div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Journals with article metadata <span class="tooltip-icon" data-tooltip="Percentage of journals that uploaded article metadata in the previous calendar year. For example, 2025 shows journals that uploaded articles in 2024.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -1577,10 +1577,8 @@
     function buildArticleMetadataTimeline(records) {
       let minYear = null;
       let maxYear = null;
-      const yearCreatedCounts = {};
-      const yearWithArticlesCounts = {};
 
-      // Count journals created each year and those with article records
+      // Find year range
       for (const record of records || []) {
         if (!record || !record.created_date) continue;
         
@@ -1598,14 +1596,14 @@
       const years = [];
       const percentages = [];
       
-      // For each year up to 2025, calculate percentage of journals created by that year with article records
+      // For each year, calculate percentage of journals with article metadata uploaded in previous calendar year
       let maxYearForChart = Math.min(maxYear, 2025);
       for (let year = minYear; year <= maxYearForChart; year++) {
         years.push(year);
         
-        // Count all journals created in year or earlier
+        // Count journals created by this year and those with recent article uploads
         let journalsCreatedByYear = 0;
-        let journalsWithArticles = 0;
+        let journalsWithRecentArticles = 0;
         
         for (const record of records || []) {
           if (!record || !record.created_date) continue;
@@ -1613,14 +1611,21 @@
           
           if (recordYear <= year) {
             journalsCreatedByYear++;
-            const articles = getArticleRecords(record);
-            if (articles !== null && articles > 0) {
-              journalsWithArticles++;
+            
+            // Check if journal uploaded articles in the previous calendar year
+            if (record.most_recent_article_date) {
+              const articleDate = new Date(record.most_recent_article_date);
+              const articleYear = articleDate.getUTCFullYear();
+              
+              // For year X, check if articles were uploaded in year X-1
+              if (articleYear === year - 1) {
+                journalsWithRecentArticles++;
+              }
             }
           }
         }
         
-        const percentage = journalsCreatedByYear > 0 ? ((journalsWithArticles / journalsCreatedByYear) * 100).toFixed(1) : 0;
+        const percentage = journalsCreatedByYear > 0 ? ((journalsWithRecentArticles / journalsCreatedByYear) * 100).toFixed(1) : 0;
         percentages.push(percentage);
       }
 
