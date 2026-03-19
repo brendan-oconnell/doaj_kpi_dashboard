@@ -11,7 +11,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Open Access Journals in DOAJ</title>
+  <title>DOAJ KPIs Dashboard</title>
   <script src="config.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -219,10 +219,10 @@
       color: #FFFFFF;
       padding: 8px 10px;
       border-radius: 6px;
-      font-size: 11px;
+      font-size: 14px;
       font-weight: 400;
       white-space: normal;
-      width: 180px;
+      width: 220px;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
@@ -263,10 +263,10 @@
       color: #FFFFFF;
       padding: 8px 10px;
       border-radius: 6px;
-      font-size: 11px;
+      font-size: 14px;
       font-weight: 400;
       white-space: normal;
-      width: 180px;
+      width: 220px;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
@@ -610,21 +610,13 @@
 
   <header>
     <div>
-      <h1>Open Access Journals in DOAJ</h1>
-      <div class="muted subline">Live snapshot (monthly) from DOAJ public data dump - <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a></div>
+      <h1>DOAJ KPI Dashboard</h1>
+      <div class="muted subline">Data from DOAJ public data dump, updated monthly - <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a></div>
     </div>
     <div style="flex:1"></div>
     <div class="muted" id="meta-info">Loading…</div>
   </header>
   <div id="status-banner" class="status-banner hidden"></div>
-
-  <div class="card-grid" id="kpi-cards">
-    <div class="card"><div class="label"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 5h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM6 9h11M6 14h11"/></svg></span>Journals</div><div class="value" id="kpi-journals">–</div></div>
-    <div class="card"><div class="label"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M3 12h18M12 3a15 15 0 0 0 0 18M12 3a15 15 0 0 1 0 18"/></svg></span>Country</div><div class="value" id="kpi-countries">–</div></div>
-    <div class="card"><div class="label"><span class="icon-chip success"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Articles</div><div class="value" id="kpi-articles">–</div></div>
-    <div class="card"><div class="label"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h10M5 16h6"/><path d="M15 5.5 17 7M13 18l2 1.5"/></svg></span>Languages</div><div class="value" id="kpi-languages">–</div></div>
-    <div class="card"><div class="label"><span class="icon-chip muted"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M8 12h5m2 0 2-2"/><path d="M5 5l14 14"/></svg></span>No APC</div><div class="value" id="kpi-no-apc">–</div></div>
-  </div>
 
   <div class="charts regional-charts">
     <div class="chart-row">
@@ -633,7 +625,7 @@
         <div class="regional-stats" id="stats-latin-america">
           <div class="stat-item"><span class="stat-label">Current journals:</span><span class="stat-value" id="latin-america-total">–</span></div>
           <div class="stat-item"><span class="stat-label">Journals added YTD 2026:</span><span class="stat-value" id="latin-america-ytd">–</span></div>
-          <div class="stat-item"><span class="stat-label with-tooltip" data-tooltip="Percent increase in total journals listed in DOAJ, comparing the last two full calendar years.">YoY increase:</span><span class="stat-value" id="latin-america-yoy">–</span></div>
+          <div class="stat-item"><span class="stat-label with-tooltip" data-tooltip="Percent increase in total journals listed in DOAJ, comparing the last full calendar year to the year before it.">Year Over Year increase:</span><span class="stat-value" id="latin-america-yoy">–</span></div>
         </div>
         <div class="chart-content" id="chart-latin-america"></div>
       </div>
@@ -642,7 +634,7 @@
         <div class="regional-stats" id="stats-africa">
           <div class="stat-item"><span class="stat-label">Current journals:</span><span class="stat-value" id="africa-total">–</span></div>
           <div class="stat-item"><span class="stat-label">Journals added YTD 2026:</span><span class="stat-value" id="africa-ytd">–</span></div>
-          <div class="stat-item"><span class="stat-label with-tooltip" data-tooltip="Percent increase in total journals listed in DOAJ, comparing the last two full calendar years.">YoY increase:</span><span class="stat-value" id="africa-yoy">–</span></div>
+          <div class="stat-item"><span class="stat-label with-tooltip" data-tooltip="Percent increase in total journals listed in DOAJ, comparing the last full calendar year to the year before it.">Year Over Year increase:</span><span class="stat-value" id="africa-yoy">–</span></div>
         </div>
         <div class="chart-content" id="chart-africa"></div>
       </div>
@@ -652,7 +644,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>No-fee journals by year <span class="tooltip-icon" data-tooltip="Journals with no article processing charges (APC). Note: based on apc_has field only, as has_other_charges is not available in our data export.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>No APC journals by year <span class="tooltip-icon" data-tooltip="Journals with no article processing charges (APC). Note: the actual percentages of journals charging fees may be slightly higher. Chart is based on apc_has field only, as has_other_charges is not available in our data export.">ⓘ</span></div>
         <div class="chart-content" id="chart-no-fee-timeline"></div>
       </div>
     </div>
@@ -661,249 +653,42 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals with updated article metadata in last year <span class="tooltip-icon" data-tooltip="Percentage of DOAJ journals whose most recent article metadata upload was within the last 365 days.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals with updated article metadata in last year <span class="tooltip-icon" data-tooltip="For each year, the % of all DOAJ journals (created up to end of calendar year) whose most recent article metadata upload was in the previous calendar year.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
   </div>
 
-  <div class="layout">
-    <div class="panel filters">
-      <h3>Filters</h3>
-      <div class="filter-group">
-        <label for="country">Country</label>
-        <select id="country"><option value="">All</option></select>
-      </div>
-      <div class="filter-group">
-        <label for="subject-filter">Subjects</label>
-        <select id="subject-filter"><option value="">All</option></select>
-      </div>
-      <div class="filter-group">
-        <label for="license">License Type</label>
-        <select id="license"><option value="">All</option></select>
-      </div>
-      <div class="filter-group">
-        <label for="apc">APC</label>
-        <select id="apc">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="author-retains">Author Retains Copyright</label>
-        <select id="author-retains">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="peer-review">Peer Review Type</label>
-        <select id="peer-review">
-          <option value="">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="language">Languages</label>
-        <select id="language">
-          <option value="">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="publisher">Publisher (text)</label>
-        <input id="publisher" type="text" placeholder="contains…" />
-      </div>
-      <div class="filter-group">
-        <label for="country-sort">Country Sort (table)</label>
-        <select id="country-sort">
-          <option value="">Default</option>
-          <option value="asc">Ascending (A-Z)</option>
-          <option value="desc">Descending (Z-A)</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="year-from">Created Year</label>
-        <div class="year-range-wrap">
-          <span class="year-end" id="year-min-label">1900</span>
-          <div class="year-range-dual">
-            <input id="year-from" type="range" min="1900" max="2100" value="1900" />
-            <input id="year-to" type="range" min="1900" max="2100" value="2100" />
-          </div>
-          <span class="year-end" id="year-max-label">2100</span>
-        </div>
-      </div>
-      <button id="reset">Reset Filters</button>
 
-      <div class="country-subject" id="country-subject">
-        <div class="country-subject-title">Top subjects by country (top 20)</div>
-        <div class="country-subject-list" id="country-subject-list"></div>
-      </div>
-    </div>
+  <footer class="site-footer">
 
-    <div class="charts">
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip success"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="6" ry="3"/><path d="M6 7v6c0 1.7 12 1.7 12 0V7M6 13c0 1.7 12 1.7 12 0"/></svg></span>Article Processing Charges</div>
-          <div class="chart-content" id="chart-apc-overview"></div>
-        </div>
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M14 14a3 3 0 1 1 0-4"/></svg></span>Authors retain copyright</div>
-          <div class="chart-content" id="chart-author-retains"></div>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 19h14M7 16v-6M12 19V8M17 19v-9"/></svg></span>Top 10 countries</div>
-          <div class="chart-content" id="chart-country"></div>
-        </div>
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M3 12h18M12 3a14 14 0 0 0 0 18M12 3a14 14 0 0 1 0 18"/></svg></span>Journals in each continent</div>
-          <div class="chart-content" id="chart-continent"></div>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 5h14v9H8l-3 3z"/></svg></span>Top 10 languages</div>
-          <div class="chart-content" id="chart-languages"></div>
-        </div>
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M7 4h10v14l-5-3-5 3z"/></svg></span>Top 10 subjects</div>
-          <div class="chart-content" id="chart-subjects"></div>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="4"/><path d="M9 14 7 20l5-2 5 2-2-6"/></svg></span>License usage</div>
-          <div class="chart-content" id="chart-license"></div>
-        </div>
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M12 4l7 3v4c0 4-3 7-7 9-4-2-7-5-7-9V7z"/><path d="M9 11l2 2 4-4"/></svg></span>Top 5 peer-review type</div>
-          <div class="chart-content" id="chart-peer-review"></div>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M10 14 7.5 16.5a3.5 3.5 0 0 0 5 5l2.5-2.5"/><path d="M14 10l2.5-2.5a3.5 3.5 0 0 0-5-5L9 5"/></svg></span>Top 5 Persistent Identifiers</div>
-          <div class="chart-content" id="chart-pid"></div>
-        </div>
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M4 7h16v3H4z"/><path d="M6 10v7h12v-7"/><path d="M10 13h4"/></svg></span>Top 5 Preservation Services</div>
-          <div class="chart-content" id="chart-preservation"></div>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 20h12V6H6z"/><path d="M9 10h2v2H9zM13 10h2v2h-2zM9 14h2v2H9zM13 14h2v2h-2z"/></svg></span>Top 10 publishers</div>
-          <div class="chart-content" id="chart-publishers"></div>
-        </div>
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Timeline of journals added to DOAJ (monthly)</div>
-          <div class="chart-content" id="chart-timeline"></div>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Top 20 countries by APC amount</div>
-          <div class="apc-country-control">
-            <div class="apc-country-control-group">
-              <label for="apc-country-continent">Continent</label>
-            <select id="apc-country-continent">
-              <option value="">All continents</option>
-              <option value="Africa">Africa</option>
-              <option value="Asia">Asia</option>
-              <option value="Europe">Europe</option>
-              <option value="North America">North America</option>
-              <option value="South America">South America</option>
-              <option value="Oceania">Oceania</option>
-            </select>
-          </div>
-          <div class="apc-country-control-group">
-            <label for="apc-currency">Currency</label>
-            <select id="apc-currency">
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-            </select>
-          </div>
-        </div>
-        <div class="chart-content" id="chart-apc-distribution"></div>
-      </div>
-      </div>
-      <div class="chart-row single">
-        <div class="chart-box map-box map-shell" id="chart-country-map-shell">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M3 12h18M12 3a14 14 0 0 0 0 18M12 3a14 14 0 0 1 0 18"/><path d="M14.5 13.5 17 16"/></svg></span>Country of Publishers</div>
-          <button id="map-fullscreen-btn" class="map-fullscreen-btn" type="button">Full page map</button>
-          <div id="map-continent-legend" class="map-continent-legend"></div>
-          <div id="chart-country-map" class="map-plot"></div>
-          <div class="map-fullscreen-footer">&copy; Ikhwan Arief, Universitas Andalas - CC BY-NC-SA - Data source DOAJ</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="table-box">
-    <div class="table-toolbar">
-      <h3 style="margin:0;">Journals</h3>
-    </div>
-    <div class="table-controls">
-      <div class="table-search">
-        <label for="search-query">Search (title, country, subject)</label>
-        <input id="search-query" type="text" placeholder="Start typing..." autocomplete="off" />
-      </div>
-      <div class="table-inline-filters">
-        <div class="table-filter-group">
-          <label for="table-apc">APC</label>
-          <select id="table-apc">
-            <option value="">All</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="table-filter-group">
-          <label for="table-author-retains">Authors holding copyright</label>
-          <select id="table-author-retains">
-            <option value="">All</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Journal title</th>
-          <th>Country of publisher</th>
-          <th>Subject</th>
-          <th>APC</th>
-          <th id="th-apc-max">APC (max EUR)</th>
-          <th>Article records</th>
-          <th>Date of inclusion</th>
-          <th>Last updated</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
-    <div class="table-footer">
-      <div class="muted" id="table-count">–</div>
-      <div class="table-nav">
-        <button id="table-prev" type="button">Prev</button>
-        <span class="table-page" id="table-page">Page 1 of 1</span>
-        <button id="table-next" type="button">Next</button>
-      </div>
-    </div>
-  </div>
+
 
   <footer class="site-footer">
     <div class="footer-row">
-      <div>&copy; Ikhwan Arief, Universitas Andalas. <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA</a>. Data source: <a href="https://doaj.org/docs/public-data-dump/" target="_blank" rel="noopener noreferrer">DOAJ</a></div>
-    </div>
-    <div class="footer-row footer-source" id="fx-source-note">
-      <div>Exchange-rate sources: <a href="https://www.frankfurter.app/" target="_blank" rel="noopener noreferrer">Frankfurter API</a> (primary), <a href="https://open.er-api.com/" target="_blank" rel="noopener noreferrer">open.er-api.com</a> (fallback)</div>
+      <div>&copy; Brendan O'Connell, based on <a href="https://github.com/ikhwan-arief/doaj">DOAJ dashboard</a> by Ikhwan Arief, Universitas Andalas. <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA</a>. Data source: <a href="https://doaj.org/docs/public-data-dump/" target="_blank" rel="noopener noreferrer">DOAJ</a></div>
     </div>
   </footer>
 
   <script>
+    // Guard Plotly.newPlot so calls targeting removed elements are silently skipped,
+    // and inject a larger default tooltip font across all charts.
+    {
+      const _origNewPlot = Plotly.newPlot.bind(Plotly);
+      Plotly.newPlot = (id, data, layout, config) => {
+        const el = typeof id === 'string' ? document.getElementById(id) : id;
+        if (!el) return Promise.resolve();
+        const patchedLayout = Object.assign({}, layout);
+        if (!patchedLayout.hoverlabel) {
+          patchedLayout.hoverlabel = { font: { size: 15 } };
+        } else if (!patchedLayout.hoverlabel.font) {
+          patchedLayout.hoverlabel = Object.assign({}, patchedLayout.hoverlabel, { font: { size: 15 } });
+        }
+        return _origNewPlot(id, data, patchedLayout, config);
+      };
+    }
+
     const state = {
       records: [],
       filtered: [],
@@ -1575,34 +1360,51 @@
     }
 
     function buildArticleMetadataTimeline(records) {
-      const today = new Date();
-      const oneYearAgo = new Date(today);
-      oneYearAgo.setDate(oneYearAgo.getDate() - 365);
-      
-      let uploadedInLast365Days = 0;
-      let total = 0;
-      
+      // For each year Y, look at all journals created ≤ end of Y,
+      // and compute % that uploaded any article metadata to DOAJ in year Y-1
+      // (based on article_upload_years: years in which created_date falls, via DOAJ article API).
+      const currentYear = new Date().getUTCFullYear();
+      let minCreatedYear = null;
+
       for (const record of records || []) {
-        if (!record) continue;
-        total++;
-        
-        if (record.most_recent_article_date) {
-          const articleDate = new Date(record.most_recent_article_date);
-          
-          if (articleDate >= oneYearAgo) {
-            uploadedInLast365Days++;
-          }
-        }
+        if (!record || !record.created_date) continue;
+        const y = new Date(record.created_date).getUTCFullYear();
+        if (Number.isNaN(y)) continue;
+        if (minCreatedYear === null || y < minCreatedYear) minCreatedYear = y;
       }
-      
-      const percentage = total > 0 ? ((uploadedInLast365Days / total) * 100).toFixed(1) : 0;
-      const percentageNo = (100 - percentage).toFixed(1);
-      
-      return {
-        uploadedRecently: percentage,
-        notUploadedRecently: percentageNo,
-        total: total
-      };
+
+      if (minCreatedYear === null) return { years: [], percentages: [], counts: [], totals: [] };
+
+      // Show bars from first year+1 (need Y-1 data) up to last full year
+      const maxYear = currentYear - 1;
+      const years = [];
+      const percentages = [];
+      const counts = [];
+      const totals = [];
+
+      for (let Y = Math.max(minCreatedYear + 1, 2005); Y <= maxYear; Y++) {
+        const endOfY = new Date(Date.UTC(Y, 11, 31));
+        const prevYear = Y - 1;
+        let total = 0;
+        let withUpdate = 0;
+        for (const record of records || []) {
+          if (!record || !record.created_date) continue;
+          const created = new Date(record.created_date);
+          if (isNaN(created) || created > endOfY) continue;
+          total++;
+          const uploadYears = Array.isArray(record.article_upload_years)
+            ? record.article_upload_years
+            : [];
+          if (uploadYears.includes(prevYear)) withUpdate++;
+        }
+        if (total === 0) continue;
+        years.push(Y);
+        percentages.push(parseFloat(((withUpdate / total) * 100).toFixed(1)));
+        counts.push(withUpdate);
+        totals.push(total);
+      }
+
+      return { years, percentages, counts, totals };
     }
 
     function getCreatedYear(record) {
@@ -2164,18 +1966,13 @@
     function syncYearLabels() {
       const minEl = document.getElementById('year-min-label');
       const maxEl = document.getElementById('year-max-label');
-      if (!state.yearBounds) {
-        minEl.textContent = '—';
-        maxEl.textContent = '—';
-        return;
-      }
-      minEl.textContent = String(state.yearBounds.min);
-      maxEl.textContent = String(state.yearBounds.max);
+      if (!minEl || !maxEl) return;
     }
 
     function setupYearRange() {
       const fromEl = document.getElementById('year-from');
       const toEl = document.getElementById('year-to');
+      if (!fromEl || !toEl) return;
       const years = state.records.map(getCreatedYear).filter(y => y !== null);
 
       if (!years.length) {
@@ -2213,14 +2010,7 @@
     function resetYearRange() {
       const fromEl = document.getElementById('year-from');
       const toEl = document.getElementById('year-to');
-      if (!state.yearBounds) {
-        fromEl.value = '';
-        toEl.value = '';
-      } else {
-        fromEl.value = String(state.yearBounds.min);
-        toEl.value = String(state.yearBounds.max);
-      }
-      syncYearLabels();
+      if (!fromEl || !toEl) return;
     }
 
     async function loadJsonOrNull(path) {
@@ -2329,6 +2119,7 @@
     }
 
     function populateFilters() {
+      if (!document.getElementById('country')) return;
       const countries = Array.from(new Set(state.records.map(r => r.country).filter(Boolean)))
         .sort((a, b) => formatCountry(a).localeCompare(formatCountry(b)));
       const subjects = Array.from(new Set(state.records.flatMap(r => toValueList(r.subject_terms))))
@@ -2389,19 +2180,19 @@
     }
 
     function applyFilters() {
-      const country = document.getElementById('country').value;
-      const subjectFilter = document.getElementById('subject-filter').value;
-      const searchQuery = document.getElementById('search-query').value.trim().toLowerCase();
-      const license = document.getElementById('license').value;
-      const apc = document.getElementById('apc').value;
-      const author = document.getElementById('author-retains').value;
-      const tableApc = document.getElementById('table-apc').value;
-      const tableAuthor = document.getElementById('table-author-retains').value;
-      const peerReview = document.getElementById('peer-review').value;
-      const language = document.getElementById('language').value;
-      const publisher = document.getElementById('publisher').value.trim().toLowerCase();
-      const yearFrom = parseInt(document.getElementById('year-from').value, 10);
-      const yearTo = parseInt(document.getElementById('year-to').value, 10);
+      const country = (document.getElementById('country') || {}).value || '';
+      const subjectFilter = (document.getElementById('subject-filter') || {}).value || '';
+      const searchQuery = ((document.getElementById('search-query') || {}).value || '').trim().toLowerCase();
+      const license = (document.getElementById('license') || {}).value || '';
+      const apc = (document.getElementById('apc') || {}).value || '';
+      const author = (document.getElementById('author-retains') || {}).value || '';
+      const tableApc = (document.getElementById('table-apc') || {}).value || '';
+      const tableAuthor = (document.getElementById('table-author-retains') || {}).value || '';
+      const peerReview = (document.getElementById('peer-review') || {}).value || '';
+      const language = (document.getElementById('language') || {}).value || '';
+      const publisher = ((document.getElementById('publisher') || {}).value || '').trim().toLowerCase();
+      const yearFrom = parseInt((document.getElementById('year-from') || {}).value, 10);
+      const yearTo = parseInt((document.getElementById('year-to') || {}).value, 10);
 
       state.filtered = state.records.filter(r => {
         if (country && r.country !== country) return false;
@@ -2457,11 +2248,12 @@
       const languages = new Set(state.filtered.flatMap(r => getSimpleTerms(r.language)));
       const noApc = state.filtered.filter(r => r.apc_has === false).length;
 
-      document.getElementById('kpi-journals').textContent = formatNumber(state.filtered.length);
-      document.getElementById('kpi-countries').textContent = formatNumber(countries.size);
-      document.getElementById('kpi-articles').textContent = formatNumber(sumArticleRecords(state.filtered));
-      document.getElementById('kpi-languages').textContent = formatNumber(languages.size);
-      document.getElementById('kpi-no-apc').textContent = formatNumber(noApc);
+      const _setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      _setKpi('kpi-journals', formatNumber(state.filtered.length));
+      _setKpi('kpi-countries', formatNumber(countries.size));
+      _setKpi('kpi-articles', formatNumber(sumArticleRecords(state.filtered)));
+      _setKpi('kpi-languages', formatNumber(languages.size));
+      _setKpi('kpi-no-apc', formatNumber(noApc));
 
       const metaText = `Source last updated: ${formatDate(state.meta.source_last_updated_max)}`;
       document.getElementById('meta-info').textContent = metaText;
@@ -2836,7 +2628,7 @@
       const noFeeData = buildNoFeeTimeline(state.filtered);
       
       if (!noFeeData.years.length) {
-        renderNoDataChart('chart-no-fee-timeline', 'No-fee journals by year');
+        renderNoDataChart('chart-no-fee-timeline', 'No APC journals by year');
       } else {
         const noFeePercentages = noFeeData.totalCounts.map((total, idx) =>
           total > 0 ? ((noFeeData.noFeeCounts[idx] / total) * 100).toFixed(1) : 0
@@ -2846,27 +2638,31 @@
           'chart-no-fee-timeline',
           [{
             type: 'bar',
-            name: 'Journals with fees',
+            name: 'Journals with APCs',
             x: noFeeData.years,
             y: noFeeData.totalCounts.map((total, idx) => total - noFeeData.noFeeCounts[idx]),
             customdata: noFeeData.annualTotalAdditions.map((total, idx) => {
               const cumulativeTotal = noFeeData.totalCounts[idx];
               const cumulativeNoFee = noFeeData.noFeeCounts[idx];
+              const cumulativeFees = cumulativeTotal - cumulativeNoFee;
               const noFeePercent = cumulativeTotal > 0 ? ((cumulativeNoFee / cumulativeTotal) * 100).toFixed(1) : 0;
+              const feesPercent = cumulativeTotal > 0 ? ((cumulativeFees / cumulativeTotal) * 100).toFixed(1) : 0;
               return {
                 annualTotal: total,
                 annualNoFee: noFeeData.annualNoFeeAdditions[idx],
                 annualFees: total - noFeeData.annualNoFeeAdditions[idx],
                 noFeePercent: noFeePercent,
+                feesPercent: feesPercent,
                 cumulativeTotal: cumulativeTotal,
-                cumulativeNoFee: cumulativeNoFee
+                cumulativeNoFee: cumulativeNoFee,
+                cumulativeFees: cumulativeFees
               };
             }),
             marker: { color: '#FD5A3B' },
-            hovertemplate: 'Year %{x}<br>Journals added with fees: %{customdata.annualFees:,d}<br>Cumulative total with fees: %{y:,d}<br>No-fee journals: %{customdata.noFeePercent}% of %{customdata.cumulativeTotal:,d}<extra></extra>'
+            hovertemplate: 'Year %{x}<br>Journals with APCs added: %{customdata.annualFees:,d}<br>Cumulative total with APCs: %{customdata.cumulativeFees:,d} (%{customdata.feesPercent}%)<extra></extra>'
           }, {
             type: 'bar',
-            name: 'No-fee journals',
+            name: 'Journals with no APCs',
             x: noFeeData.years,
             y: noFeeData.noFeeCounts,
             customdata: noFeeData.annualNoFeeAdditions.map((annual, idx) => {
@@ -2881,20 +2677,20 @@
               };
             }),
             marker: { color: '#47A178' },
-            hovertemplate: 'Year %{x}<br>No-fee journals added: %{customdata.annual:,d}<br>Cumulative no-fee total: %{y:,d}<br>%{customdata.noFeePercent}% of %{customdata.cumulativeTotal:,d} total<extra></extra>'
+            hovertemplate: 'Year %{x}<br>No APC journals added: %{customdata.annual:,d}<br>Cumulative No APC total: %{y:,d}<br>%{customdata.noFeePercent}% of %{customdata.cumulativeTotal:,d} total<extra></extra>'
           }, {
             type: 'scatter',
             mode: 'lines+markers',
-            name: '% No-fee',
+            name: '% No APC',
             x: noFeeData.years,
             y: noFeePercentages.map(p => parseFloat(p)),
             yaxis: 'y2',
             line: { color: '#282624', width: 2, dash: 'dot' },
             marker: { size: 5, color: '#282624' },
-            hovertemplate: 'Year %{x}<br>%{y:.1f}% of journals are no-fee<extra></extra>'
+            hovertemplate: 'Year %{x}<br>%{y:.1f}% of journals are No APC<extra></extra>'
           }],
           {
-            title: 'No-fee journals by year',
+            title: 'No APC journals by year',
             barmode: 'stack',
             margin: { l: 52, r: 56, t: 46, b: 58 },
             paper_bgcolor: 'rgba(0,0,0,0)',
@@ -2923,59 +2719,38 @@
       // Render article metadata chart
       const articleMetadataData = buildArticleMetadataTimeline(state.filtered);
       
-      if (!articleMetadataData.total) {
+      if (!articleMetadataData.years.length) {
         renderNoDataChart('chart-article-metadata', 'Journals uploading article metadata');
       } else {
+        const maxPct = Math.max(...articleMetadataData.percentages, 1);
         Plotly.newPlot(
           'chart-article-metadata',
           [
             {
               type: 'bar',
-              orientation: 'h',
-              x: [parseFloat(articleMetadataData.uploadedRecently)],
-              y: [''],
-              name: 'Yes',
+              x: articleMetadataData.years,
+              y: articleMetadataData.percentages,
               marker: { color: '#47A178' },
-              text: [articleMetadataData.uploadedRecently + '%'],
-              textposition: 'inside',
-              textfont: { color: 'white' },
-              hovertemplate: '%{x:.1f}% uploaded in last 365 days<extra></extra>'
-            },
-            {
-              type: 'bar',
-              orientation: 'h',
-              x: [parseFloat(articleMetadataData.notUploadedRecently)],
-              y: [''],
-              name: 'No',
-              marker: { color: '#FD5A3B' },
-              text: [articleMetadataData.notUploadedRecently + '%'],
-              textposition: 'inside',
-              textfont: { color: 'white' },
-              hovertemplate: '%{x:.1f}% did not upload in last 365 days<extra></extra>'
+              customdata: articleMetadataData.years.map((y, i) => ({
+                count: articleMetadataData.counts[i],
+                total: articleMetadataData.totals[i],
+                prevYear: y - 1
+              })),
+              hovertemplate: 'Year %{x}<br>%{y:.1f}% had metadata updates in %{customdata.prevYear}<br>(%{customdata.count:,d} of %{customdata.total:,d} journals)<extra></extra>'
             }
           ],
           {
-            barmode: 'stack',
-            margin: { l: 100, r: 44, t: 20, b: 44 },
+            margin: { l: 52, r: 44, t: 20, b: 58 },
             paper_bgcolor: 'rgba(0,0,0,0)',
             plot_bgcolor: 'rgba(0,0,0,0)',
             font: { color: '#282624' },
-            xaxis: {
-              range: [0, 100],
-              tickformat: '.0f',
-              ticksuffix: '%'
-            },
+            xaxis: { tickformat: 'd', dtick: 1 },
             yaxis: {
-              tickfont: { size: 12 }
+              tickformat: '.0f',
+              ticksuffix: '%',
+              range: [0, Math.min(maxPct * 1.15, 100)]
             },
-            showlegend: true,
-            legend: {
-              orientation: 'h',
-              x: 0,
-              y: -0.3,
-              bgcolor: 'rgba(0,0,0,0)',
-              bordercolor: 'rgba(0,0,0,0)'
-            }
+            showlegend: false
           },
           { displayModeBar: false }
         );
@@ -3074,11 +2849,11 @@
       ];
       emptyCharts.forEach(([id, title]) => renderHorizontalBarChart(id, title, []));
       
-      // Clear no-fee chart
-      renderNoDataChart('chart-no-fee-timeline', 'No-fee journals by year');
+      // Clear No APC chart
+      renderNoDataChart('chart-no-fee-timeline', 'No APC journals by year');
       
       // Clear article metadata chart
-      renderNoDataChart('chart-article-metadata', 'Journals with article metadata');
+      renderNoDataChart('chart-article-metadata', 'Journals with article metadata by year');
       
       // Clear regional stats
       document.getElementById('latin-america-total').textContent = '–';
@@ -3302,7 +3077,6 @@
     function renderAll() {
       renderKPIs();
       renderCharts();
-      renderTable();
     }
 
     function wireEvents() {
@@ -3326,7 +3100,7 @@
       }
       const searchEl = document.getElementById('search-query');
       let searchDebounceTimer = null;
-      searchEl.addEventListener('input', () => {
+      if (searchEl) searchEl.addEventListener('input', () => {
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => applyFilters(), 180);
       });
@@ -3346,33 +3120,36 @@
       window.addEventListener('resize', () => setTimeout(resizeMapPlot, 60));
       updateMapFullscreenButtonLabel();
 
-      document.getElementById('table-prev').addEventListener('click', () => {
+      const tablePrevEl = document.getElementById('table-prev');
+      if (tablePrevEl) tablePrevEl.addEventListener('click', () => {
         if (state.tablePage <= 1) return;
         state.tablePage -= 1;
         renderTable();
       });
-      document.getElementById('table-next').addEventListener('click', () => {
+      const tableNextEl = document.getElementById('table-next');
+      if (tableNextEl) tableNextEl.addEventListener('click', () => {
         state.tablePage += 1;
         renderTable();
       });
 
       const fromEl = document.getElementById('year-from');
       const toEl = document.getElementById('year-to');
-      fromEl.addEventListener('input', () => {
+      if (fromEl) fromEl.addEventListener('input', () => {
         if (parseInt(fromEl.value, 10) > parseInt(toEl.value, 10)) {
           toEl.value = fromEl.value;
         }
         syncYearLabels();
         applyFilters();
       });
-      toEl.addEventListener('input', () => {
+      if (toEl) toEl.addEventListener('input', () => {
         if (parseInt(toEl.value, 10) < parseInt(fromEl.value, 10)) {
           fromEl.value = toEl.value;
         }
         syncYearLabels();
         applyFilters();
       });
-      document.getElementById('reset').addEventListener('click', resetFilters);
+      const resetEl = document.getElementById('reset');
+      if (resetEl) resetEl.addEventListener('click', resetFilters);
     }
 
     async function init() {

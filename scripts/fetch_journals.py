@@ -18,10 +18,14 @@ import json
 import os
 import re
 import sys
+import threading
+import time
 import unicodedata
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence
+from urllib.parse import quote
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -29,6 +33,24 @@ from urllib3.util.retry import Retry
 
 CSV_URL = os.environ.get("DOAJ_CSV_URL", "https://doaj.org/csv")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "docs", "data")
+
+# Earliest year to check for article coverage in the metadata histogram.
+ARTICLE_CHART_START_YEAR = 2004
+
+# Number of parallel workers for article API queries.
+ARTICLE_FETCH_WORKERS = int(os.environ.get("ARTICLE_FETCH_WORKERS", "5"))
+
+# Per-request sleep (seconds) inside each worker thread.
+ARTICLE_FETCH_SLEEP = float(os.environ.get("ARTICLE_FETCH_SLEEP", "0.03"))
+
+_thread_local = threading.local()
+
+
+def _get_thread_session() -> requests.Session:
+    """Return a per-thread requests.Session (created lazily)."""
+    if not hasattr(_thread_local, "session"):
+        _thread_local.session = build_session()
+    return _thread_local.session
 
 
 def build_session() -> requests.Session:
@@ -53,33 +75,48 @@ def build_session() -> requests.Session:
     return session
 
 
-def get_most_recent_article_date(session: requests.Session, issn: Optional[str]) -> Optional[str]:
-    """Query DOAJ API to get the most recent article update date for a journal by ISSN."""
+def get_article_upload_years(issn: Optional[str], created_year: Optional[int]) -> dict:
+    """Query DOAJ article API once per year to determine which years a journal
+    uploaded article metadata to DOAJ, regardless of article publication year.
+
+    For each year from max(ARTICLE_CHART_START_YEAR, created_year) to last full year,
+    issues a pageSize=1 query filtered to articles whose created_date falls in that
+    calendar year. Returns:
+      - most_recent_article_date: created_date of the most recently uploaded article found
+      - article_upload_years: sorted list of years in which at least one article was uploaded
+    """
+    empty = {"most_recent_article_date": None, "article_upload_years": []}
     if not issn or not issn.strip():
-        return None
-    
-    try:
-        # Search articles by journal ISSN, get the most recent one
-        from urllib.parse import quote
-        import time
-        search_query = f'issn:"{issn.strip()}"'
-        url = f'https://doaj.org/api/v3/search/articles/{quote(search_query)}'
-        
-        response = session.get(url, params={'pageSize': 1}, timeout=5)
-        # Rate limit: add small delay to avoid overwhelming the API
-        time.sleep(0.05)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('results') and len(data['results']) > 0:
-                article = data['results'][0]
-                # Return the last_updated date of the most recent article
-                return article.get('last_updated')
-    except Exception:
-        # Silently fail - article data is not critical
-        pass
-    
-    return None
+        return empty
+
+    session = _get_thread_session()
+    current_year = datetime.now(timezone.utc).year
+    start = max(ARTICLE_CHART_START_YEAR, created_year) if created_year else ARTICLE_CHART_START_YEAR
+    years_to_check = list(range(start, current_year))  # up to, not including, current year
+
+    upload_years = []
+    most_recent: Optional[str] = None
+
+    for year in reversed(years_to_check):  # newest first so most_recent_article_date is populated early
+        try:
+            query = f'issn:"{issn.strip()}" AND created_date:[{year}-01-01 TO {year}-12-31]'
+            url = f'https://doaj.org/api/v3/search/articles/{quote(query)}'
+            resp = session.get(url, params={"pageSize": 1}, timeout=10)
+            time.sleep(ARTICLE_FETCH_SLEEP)
+
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("total", 0) > 0:
+                    upload_years.append(year)
+                    if most_recent is None and data.get("results"):
+                        most_recent = data["results"][0].get("created_date")
+        except Exception:
+            pass  # article data is not critical
+
+    return {
+        "most_recent_article_date": most_recent,
+        "article_upload_years": sorted(upload_years),
+    }
 
 
 def normalize_header(value: str) -> str:
@@ -766,19 +803,39 @@ def main() -> int:
     records, headers, response_meta = load_csv_records(session)
     print(f"Fetched {len(records)} journal rows from CSV", file=sys.stderr)
 
-    # Query article API to get most recent article update date for each journal
-    print("Fetching article metadata...", file=sys.stderr)
-    for idx, record in enumerate(records, start=1):
-        if idx % 100 == 0:
-            print(f"  Processed {idx}/{len(records)} journals", file=sys.stderr)
-        
-        # Try both eissn and pissn
+    # Query article API year-by-year for each journal (year-specific queries, no cap).
+    print(
+        f"Fetching article metadata with {ARTICLE_FETCH_WORKERS} workers...",
+        file=sys.stderr,
+    )
+    total = len(records)
+    done_count = [0]
+    count_lock = threading.Lock()
+
+    def _process(record: dict) -> None:
         issn = record.get("eissn") or record.get("pissn")
         if issn:
-            most_recent = get_most_recent_article_date(session, issn)
-            record["most_recent_article_date"] = most_recent
+            created_year: Optional[int] = None
+            raw_date = record.get("created_date")
+            if raw_date:
+                try:
+                    created_year = int(str(raw_date)[:4])
+                except (ValueError, TypeError):
+                    pass
+            article_data = get_article_upload_years(issn, created_year)
+            record["most_recent_article_date"] = article_data["most_recent_article_date"]
+            record["article_upload_years"] = article_data["article_upload_years"]
+        with count_lock:
+            done_count[0] += 1
+            if done_count[0] % 100 == 0:
+                print(f"  Processed {done_count[0]}/{total} journals", file=sys.stderr)
 
-    print(f"Finished fetching article metadata", file=sys.stderr)
+    with ThreadPoolExecutor(max_workers=ARTICLE_FETCH_WORKERS) as executor:
+        futures = [executor.submit(_process, record) for record in records]
+        for future in as_completed(futures):
+            future.result()  # re-raise any unexpected exception
+
+    print("Finished fetching article metadata", file=sys.stderr)
 
     aggregates = aggregate(records)
     fetched_at = datetime.now(timezone.utc).isoformat()
