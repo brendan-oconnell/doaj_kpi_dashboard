@@ -2058,6 +2058,8 @@
             const envelope = await res.json();
             const iv = b64ToBytes(envelope.iv);
             const data = b64ToBytes(envelope.data);
+            // All files were encrypted with the same key (derived from the global
+            // ENCRYPTION_SALT in config.js), so _decryptionKey works for every file.
             const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, _decryptionKey, data);
             return JSON.parse(new TextDecoder().decode(plain));
           } catch (_) {
@@ -3410,12 +3412,16 @@
       btn.textContent = 'Verifying\u2026';
 
       try {
-        // Fetch the smallest encrypted file to verify the password without loading all data
+        // Derive the AES key from the password + the global salt stored in config.js.
+        // All .enc files were encrypted with this same key, so deriving it once here
+        // is sufficient for decrypting every file in loadData().
+        const key = await deriveKey(password, window.ENCRYPTION_SALT);
+
+        // Verify the password is correct by attempting to decrypt the probe file.
+        // AES-GCM throws DOMException when the auth tag does not match (wrong key).
         const probeRes = await fetch('data/aggregates.json.enc', { cache: 'no-store' });
         if (!probeRes.ok) throw new Error('Encrypted data not found. Has the dashboard been deployed via GitHub Actions?');
         const envelope = await probeRes.json();
-        const key = await deriveKey(password, envelope.salt);
-        // AES-GCM decrypt throws DOMException when the auth tag does not match (wrong password)
         await crypto.subtle.decrypt(
           { name: 'AES-GCM', iv: b64ToBytes(envelope.iv) },
           key,
