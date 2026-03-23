@@ -2450,19 +2450,20 @@
           type: 'bar', name: 'Accepted', x: chartYears, y: accepted,
           marker: { color },
           customdata: submitted.map((s, i) => ({ sub: s, acc: accepted[i], pct: pcts[i] })),
-          hovertemplate: 'Year %{x}<br>Accepted: %{y:,d}<br>Submitted: %{customdata.sub:,d}<extra></extra>'
+          hovertemplate: 'Year %{x}<br>Total applications: %{customdata.sub:,d}<br>Accepted: %{y:,d}<extra></extra>'
         }, {
           type: 'bar', name: 'Not accepted / pending', x: chartYears, y: rejected,
           marker: { color: '#D7D2CE' },
           customdata: submitted.map((s, i) => ({ sub: s, rej: rejected[i] })),
-          hovertemplate: 'Year %{x}<br>Not accepted / pending: %{customdata.rej:,d}<br>Submitted: %{customdata.sub:,d}<extra></extra>'
+          hovertemplate: 'Year %{x}<br>Total applications: %{customdata.sub:,d}<br>Not accepted / pending: %{customdata.rej:,d}<extra></extra>'
         }, {
           type: 'scatter', mode: 'lines+markers', name: 'Acceptance %',
           x: chartYears, y: pcts,
+          customdata: submitted,
           yaxis: 'y2',
           line: { color: '#282624', width: 2, dash: 'dot' },
           marker: { size: 5, color: '#282624' },
-          hovertemplate: 'Year %{x}<br>Acceptance rate: %{y:.1f}%<extra></extra>'
+          hovertemplate: 'Year %{x}<br>Total applications: %{customdata:,d}<br>Acceptance rate: %{y:.1f}%<extra></extra>'
         }],
         {
           barmode: 'stack',
