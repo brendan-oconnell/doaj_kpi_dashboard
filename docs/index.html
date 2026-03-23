@@ -2485,6 +2485,8 @@
 
       // Submitted applications from LATAM_APPLICATIONS_DATA secret (injected via config.js by GitHub Actions).
       // Accepted = journals added per year from the Growth in journals chart (laGrowthData).
+      // To refresh: use this DOAJ admin query (March 2026):
+      // https://doaj.org/admin/applications?source=%7B%22query%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22terms%22%3A%7B%22index.country.exact%22%3A%5B%22Argentina%22%2C%22Bahamas%22%2C%22Barbados%22%2C%22Belize%22%2C%22Bolivia%2C%20Plurinational%20State%20of%22%2C%22Brazil%22%2C%22Chile%22%2C%22Colombia%22%2C%22Costa%20Rica%22%2C%22Cuba%22%2C%22Dominican%20Republic%22%2C%22Ecuador%22%2C%22El%20Salvador%22%2C%22Guadeloupe%22%2C%22Guatemala%22%2C%22Guyana%22%2C%22Haiti%22%2C%22Honduras%22%2C%22Jamaica%22%2C%22Martinique%22%2C%22Mexico%22%2C%22Nicaragua%22%2C%22Panama%22%2C%22Paraguay%22%2C%22Peru%22%2C%22Puerto%20Rico%22%2C%22Suriname%22%2C%22Trinidad%20and%20Tobago%22%2C%22Uruguay%22%2C%22Venezuela%2C%20Bolivarian%20Republic%20of%22%5D%7D%7D%5D%7D%7D%2C%22sort%22%3A%5B%7B%22admin.date_applied%22%3A%7B%22order%22%3A%22asc%22%7D%7D%5D%2C%22track_total_hits%22%3Atrue%7D
       const LATAM_SUBMITTED = window.LATAM_APPLICATIONS_DATA;
       let latAmRegionData = null;
       if (LATAM_SUBMITTED && laGrowthData && Array.isArray(laGrowthData.years) && laGrowthData.years.length) {
@@ -2500,6 +2502,8 @@
 
       // Submitted applications from AFRICA_APPLICATIONS_DATA secret (injected via config.js by GitHub Actions).
       // Accepted = journals added per year from the Growth in journals chart (afGrowthData).
+      // To refresh: use this DOAJ admin query (March 2026):
+      // https://doaj.org/admin/applications?source=%7B%22query%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22terms%22%3A%7B%22index.country.exact%22%3A%5B%22Algeria%22%2C%22Angola%22%2C%22Benin%22%2C%22Burkina%20Faso%22%2C%22Cameroon%22%2C%22Congo%22%2C%22Congo%2C%20The%20Democratic%20Republic%20of%20the%22%2C%22C%C3%B4te%20d%27Ivoire%22%2C%22Egypt%22%2C%22Eritrea%22%2C%22Eswatini%22%2C%22Ethiopia%22%2C%22Gabon%22%2C%22Gambia%22%2C%22Ghana%22%2C%22Kenya%22%2C%22Liberia%22%2C%22Libya%22%2C%22Madagascar%22%2C%22Malawi%22%2C%22Mali%22%2C%22Mauritius%22%2C%22Morocco%22%2C%22Namibia%22%2C%22Niger%22%2C%22Nigeria%22%2C%22Rwanda%22%2C%22Senegal%22%2C%22Sierra%20Leone%22%2C%22Somalia%22%2C%22South%20Africa%22%2C%22South%20Sudan%22%2C%22Sudan%22%2C%22Tanzania%2C%20United%20Republic%20of%22%2C%22Togo%22%2C%22Tunisia%22%2C%22Uganda%22%2C%22Zambia%22%2C%22Zimbabwe%22%2C%22Mozambique%22%5D%7D%7D%5D%7D%7D%2C%22sort%22%3A%5B%7B%22admin.date_applied%22%3A%7B%22order%22%3A%22asc%22%7D%7D%5D%2C%22track_total_hits%22%3Atrue%7D
       const AFRICA_SUBMITTED = window.AFRICA_APPLICATIONS_DATA;
       let africaRegionData = null;
       if (AFRICA_SUBMITTED && afGrowthData && Array.isArray(afGrowthData.years) && afGrowthData.years.length) {
