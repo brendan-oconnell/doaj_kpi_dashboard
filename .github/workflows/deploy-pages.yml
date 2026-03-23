@@ -37,12 +37,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate config with secret
+      - name: Encrypt data and generate config
+        env:
+          DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+          LATAM_APPLICATIONS_DATA: ${{ secrets.LATAM_APPLICATIONS_DATA }}
+          AFRICA_APPLICATIONS_DATA: ${{ secrets.AFRICA_APPLICATIONS_DATA }}
         run: |
+          node scripts/encrypt_data.js
           mkdir -p docs
-          echo "window.DASHBOARD_PASSWORD = '${{ secrets.DASHBOARD_PASSWORD }}';" > docs/config.js
-          printf 'window.LATAM_APPLICATIONS_DATA = %s;\n' '${{ secrets.LATAM_APPLICATIONS_DATA }}' >> docs/config.js
-          printf 'window.AFRICA_APPLICATIONS_DATA = %s;\n' '${{ secrets.AFRICA_APPLICATIONS_DATA }}' >> docs/config.js
+          if [ -n "$DASHBOARD_PASSWORD" ]; then
+            echo "window.ENCRYPTION_ENABLED = true;" > docs/config.js
+          else
+            echo "window.ENCRYPTION_ENABLED = false;" > docs/config.js
+          fi
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

@@ -712,7 +712,9 @@
       tablePage: 1,
       tablePageSize: 50,
       searchTerms: [],
-      applications: null
+      applications: null,
+      latamApplications: null,
+      africaApplications: null
     };
     const NOT_AVAILABLE = 'Not available';
     const FX_ENDPOINTS = [
@@ -2035,12 +2037,40 @@
     }
 
     async function loadData() {
-      const [journalsRes, aggRes, metaRes, appsRes] = await Promise.all([
-        loadJsonOrNull('data/journals.json'),
-        loadJsonOrNull('data/aggregates.json'),
-        loadJsonOrNull('data/meta.json'),
-        loadJsonOrNull('data/applications.json')
-      ]);
+      let journalsRes, aggRes, metaRes, appsRes, latamRes, africaRes;
+
+      if (window.ENCRYPTION_ENABLED && _decryptionKey) {
+        async function decryptFile(filePath) {
+          try {
+            const res = await fetch(filePath, { cache: 'no-store' });
+            if (!res.ok) return null;
+            const envelope = await res.json();
+            const iv = b64ToBytes(envelope.iv);
+            const data = b64ToBytes(envelope.data);
+            const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, _decryptionKey, data);
+            return JSON.parse(new TextDecoder().decode(plain));
+          } catch (_) {
+            return null;
+          }
+        }
+        [journalsRes, aggRes, metaRes, appsRes, latamRes, africaRes] = await Promise.all([
+          decryptFile('data/journals.json.enc'),
+          decryptFile('data/aggregates.json.enc'),
+          decryptFile('data/meta.json.enc'),
+          decryptFile('data/applications.json.enc'),
+          decryptFile('data/latam_applications.json.enc'),
+          decryptFile('data/africa_applications.json.enc'),
+        ]);
+      } else {
+        [journalsRes, aggRes, metaRes, appsRes] = await Promise.all([
+          loadJsonOrNull('data/journals.json'),
+          loadJsonOrNull('data/aggregates.json'),
+          loadJsonOrNull('data/meta.json'),
+          loadJsonOrNull('data/applications.json')
+        ]);
+        latamRes = null;
+        africaRes = null;
+      }
 
       if (!Array.isArray(journalsRes) || journalsRes.length === 0) {
         state.records = [];
@@ -2049,6 +2079,8 @@
         state.meta = metaRes || {};
         state.chartScale = {};
         state.applications = appsRes || null;
+        state.latamApplications = latamRes || null;
+        state.africaApplications = africaRes || null;
         setStatus('Data is not available yet. Trigger the "Fetch DOAJ journals (hourly)" GitHub Action, then refresh this page.');
         renderAll();
         return;
@@ -2059,6 +2091,8 @@
       state.aggregates = aggRes || {};
       state.meta = metaRes || {};
       state.applications = appsRes || null;
+      state.latamApplications = latamRes || null;
+      state.africaApplications = africaRes || null;
       state.chartScale = computeChartScales(state.records);
       state.tablePage = 1;
       buildSearchTerms(state.records);
@@ -2484,11 +2518,11 @@
 
     function renderApplicationsCharts(laGrowthData, afGrowthData) {
 
-      // Submitted applications from LATAM_APPLICATIONS_DATA secret (injected via config.js by GitHub Actions).
+      // Submitted applications from LATAM_APPLICATIONS_DATA secret (encrypted into latam_applications.json.enc by GitHub Actions).
       // Accepted = journals added per year from the Growth in journals chart (laGrowthData).
       // To refresh: use this DOAJ admin query (March 2026):
       // https://doaj.org/admin/applications?source=%7B%22query%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22terms%22%3A%7B%22index.country.exact%22%3A%5B%22Argentina%22%2C%22Bahamas%22%2C%22Barbados%22%2C%22Belize%22%2C%22Bolivia%2C%20Plurinational%20State%20of%22%2C%22Brazil%22%2C%22Chile%22%2C%22Colombia%22%2C%22Costa%20Rica%22%2C%22Cuba%22%2C%22Dominican%20Republic%22%2C%22Ecuador%22%2C%22El%20Salvador%22%2C%22Guadeloupe%22%2C%22Guatemala%22%2C%22Guyana%22%2C%22Haiti%22%2C%22Honduras%22%2C%22Jamaica%22%2C%22Martinique%22%2C%22Mexico%22%2C%22Nicaragua%22%2C%22Panama%22%2C%22Paraguay%22%2C%22Peru%22%2C%22Puerto%20Rico%22%2C%22Suriname%22%2C%22Trinidad%20and%20Tobago%22%2C%22Uruguay%22%2C%22Venezuela%2C%20Bolivarian%20Republic%20of%22%5D%7D%7D%5D%7D%7D%2C%22sort%22%3A%5B%7B%22admin.date_applied%22%3A%7B%22order%22%3A%22asc%22%7D%7D%5D%2C%22track_total_hits%22%3Atrue%7D
-      const LATAM_SUBMITTED = window.LATAM_APPLICATIONS_DATA;
+      const LATAM_SUBMITTED = state.latamApplications;
       let latAmRegionData = null;
       if (LATAM_SUBMITTED && laGrowthData && Array.isArray(laGrowthData.years) && laGrowthData.years.length) {
         const years = Object.keys(LATAM_SUBMITTED).map(Number).sort((a, b) => a - b);
@@ -2501,11 +2535,11 @@
         latAmRegionData = { years, submitted, accepted, acceptance_pct };
       }
 
-      // Submitted applications from AFRICA_APPLICATIONS_DATA secret (injected via config.js by GitHub Actions).
+      // Submitted applications from AFRICA_APPLICATIONS_DATA secret (encrypted into africa_applications.json.enc by GitHub Actions).
       // Accepted = journals added per year from the Growth in journals chart (afGrowthData).
       // To refresh: use this DOAJ admin query (March 2026):
       // https://doaj.org/admin/applications?source=%7B%22query%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22terms%22%3A%7B%22index.country.exact%22%3A%5B%22Algeria%22%2C%22Angola%22%2C%22Benin%22%2C%22Burkina%20Faso%22%2C%22Cameroon%22%2C%22Congo%22%2C%22Congo%2C%20The%20Democratic%20Republic%20of%20the%22%2C%22C%C3%B4te%20d%27Ivoire%22%2C%22Egypt%22%2C%22Eritrea%22%2C%22Eswatini%22%2C%22Ethiopia%22%2C%22Gabon%22%2C%22Gambia%22%2C%22Ghana%22%2C%22Kenya%22%2C%22Liberia%22%2C%22Libya%22%2C%22Madagascar%22%2C%22Malawi%22%2C%22Mali%22%2C%22Mauritius%22%2C%22Morocco%22%2C%22Namibia%22%2C%22Niger%22%2C%22Nigeria%22%2C%22Rwanda%22%2C%22Senegal%22%2C%22Sierra%20Leone%22%2C%22Somalia%22%2C%22South%20Africa%22%2C%22South%20Sudan%22%2C%22Sudan%22%2C%22Tanzania%2C%20United%20Republic%20of%22%2C%22Togo%22%2C%22Tunisia%22%2C%22Uganda%22%2C%22Zambia%22%2C%22Zimbabwe%22%2C%22Mozambique%22%5D%7D%7D%5D%7D%7D%2C%22sort%22%3A%5B%7B%22admin.date_applied%22%3A%7B%22order%22%3A%22asc%22%7D%7D%5D%2C%22track_total_hits%22%3Atrue%7D
-      const AFRICA_SUBMITTED = window.AFRICA_APPLICATIONS_DATA;
+      const AFRICA_SUBMITTED = state.africaApplications;
       let africaRegionData = null;
       if (AFRICA_SUBMITTED && afGrowthData && Array.isArray(afGrowthData.years) && afGrowthData.years.length) {
         const years = Object.keys(AFRICA_SUBMITTED).map(Number).sort((a, b) => a - b);
@@ -3325,36 +3359,77 @@
       }
     }
 
-    init();
+    // Crypto helpers — data files are encrypted by scripts/encrypt_data.js during deployment.
+    // The password is used as a PBKDF2 key-derivation input; it is never stored or sent anywhere.
+    let _decryptionKey = null;
 
-    // Password is loaded from config.js (generated by GitHub Actions with secret)
-    
-    function checkPassword() {
-      if (typeof window.DASHBOARD_PASSWORD === 'undefined') {
-        console.warn('Password not configured. Allowing access.');
+    function b64ToBytes(b64) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+
+    async function deriveKey(password, saltB64) {
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']
+      );
+      return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: b64ToBytes(saltB64), iterations: 100_000, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+    }
+
+    async function checkPassword() {
+      if (!window.ENCRYPTION_ENABLED) {
         document.getElementById('password-overlay').classList.add('hidden');
+        init();
         return;
       }
-      
+
       const input = document.getElementById('password-input');
       const password = input.value;
-      
-      if (password === window.DASHBOARD_PASSWORD) {
+      if (!password) return;
+
+      const btn = document.querySelector('.password-modal button');
+      btn.disabled = true;
+      btn.textContent = 'Verifying\u2026';
+
+      try {
+        // Fetch the smallest encrypted file to verify the password without loading all data
+        const probeRes = await fetch('data/aggregates.json.enc', { cache: 'no-store' });
+        if (!probeRes.ok) throw new Error('Encrypted data not found. Has the dashboard been deployed via GitHub Actions?');
+        const envelope = await probeRes.json();
+        const key = await deriveKey(password, envelope.salt);
+        // AES-GCM decrypt throws DOMException when the auth tag does not match (wrong password)
+        await crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv: b64ToBytes(envelope.iv) },
+          key,
+          b64ToBytes(envelope.data)
+        );
+        _decryptionKey = key;
         document.getElementById('password-overlay').classList.add('hidden');
         input.value = '';
-      } else {
-        alert('Incorrect password. Please try again.');
+        init();
+      } catch (err) {
+        const isWrongPassword = err instanceof DOMException;
+        alert(isWrongPassword ? 'Incorrect password. Please try again.' : 'Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
         input.value = '';
         input.focus();
       }
     }
-    
+
     document.getElementById('password-input').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         checkPassword();
       }
     });
-    
+
     document.getElementById('password-input').focus();
   </script>
 </body>
