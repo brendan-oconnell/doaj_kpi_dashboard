@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - "docs/**"
+      - "scripts/**"
       - ".github/workflows/deploy-pages.yml"
       - ".github/workflows/fetch-journals.yml"
   workflow_run:
