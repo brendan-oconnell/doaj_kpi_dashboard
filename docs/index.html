@@ -3412,16 +3412,15 @@
       btn.textContent = 'Verifying\u2026';
 
       try {
-        // Derive the AES key from the password + the global salt stored in config.js.
-        // All .enc files were encrypted with this same key, so deriving it once here
-        // is sufficient for decrypting every file in loadData().
-        const key = await deriveKey(password, window.ENCRYPTION_SALT);
-
-        // Verify the password is correct by attempting to decrypt the probe file.
-        // AES-GCM throws DOMException when the auth tag does not match (wrong key).
+        // Fetch the probe file. Its envelope carries the shared salt used to
+        // derive the key for ALL .enc files on this deploy.
         const probeRes = await fetch('data/aggregates.json.enc', { cache: 'no-store' });
         if (!probeRes.ok) throw new Error('Encrypted data not found. Has the dashboard been deployed via GitHub Actions?');
         const envelope = await probeRes.json();
+        if (!envelope.salt) throw new Error('Missing salt in probe file. Re-run the deploy workflow.');
+        // Derive the key and immediately verify it by decrypting the probe.
+        // AES-GCM throws DOMException when the auth tag does not match (wrong password).
+        const key = await deriveKey(password, envelope.salt);
         await crypto.subtle.decrypt(
           { name: 'AES-GCM', iv: b64ToBytes(envelope.iv) },
           key,
