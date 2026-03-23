@@ -40,7 +40,8 @@ jobs:
         run: |
           mkdir -p docs
           echo "window.DASHBOARD_PASSWORD = '${{ secrets.DASHBOARD_PASSWORD }}';" > docs/config.js
-
+          echo "window.LATAM_APPLICATIONS_DATA = ${{ secrets.LATAM_APPLICATIONS_DATA }};" >> docs/config.js
+          echo "window.AFRICA_APPLICATIONS_DATA = ${{ secrets.AFRICA_APPLICATIONS_DATA }};" >> docs/config.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

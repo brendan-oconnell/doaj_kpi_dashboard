@@ -43,6 +43,31 @@ ARTICLE_FETCH_WORKERS = int(os.environ.get("ARTICLE_FETCH_WORKERS", "5"))
 # Per-request sleep (seconds) inside each worker thread.
 ARTICLE_FETCH_SLEEP = float(os.environ.get("ARTICLE_FETCH_SLEEP", "0.03"))
 
+# DOAJ API key for fetching applications data (optional).
+# To enable applications tracking:
+#   - Locally:          export DOAJ_API_KEY=your_key_here  (then run the script)
+#   - GitHub Actions:   add DOAJ_API_KEY as a repository secret via
+#                       Settings → Secrets and variables → Actions → New repository secret
+DOAJ_API_KEY = os.environ.get("DOAJ_API_KEY", "")
+
+# ISO-2 country codes for Africa.
+AFRICA_ISO2 = frozenset({
+    "DZ", "AO", "BJ", "BW", "BF", "BI", "CV", "CM", "CF", "TD", "KM",
+    "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM",
+    "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR",
+    "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL",
+    "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "ZM", "ZW", "EH",
+})
+
+# ISO-2 country codes for Latin America and the Caribbean.
+LATAM_ISO2 = frozenset({
+    "AI", "AG", "AR", "AW", "BS", "BB", "BZ", "BM", "BO", "BR", "KY",
+    "CL", "CO", "CR", "CU", "CW", "DM", "DO", "EC", "SV", "GD", "GP",
+    "GT", "GY", "HT", "HN", "JM", "MQ", "MX", "MS", "NI", "PA", "PY",
+    "PE", "PR", "BL", "KN", "LC", "MF", "PM", "VC", "SX", "SR", "TT",
+    "TC", "UY", "VE", "VG", "VI",
+})
+
 _thread_local = threading.local()
 
 
@@ -73,6 +98,172 @@ def build_session() -> requests.Session:
         }
     )
     return session
+
+
+def _get_application_country(result: dict) -> Optional[str]:
+    """Extract the ISO-2 country code from a DOAJ application API result."""
+    bibjson = result.get("bibjson") or {}
+    country = bibjson.get("country")
+    if country and isinstance(country, str):
+        return country.upper().strip()
+    publisher = bibjson.get("publisher") or {}
+    country = publisher.get("country")
+    if country and isinstance(country, str):
+        return country.upper().strip()
+    return None
+
+
+def _get_application_status(result: dict) -> str:
+    """Extract the application status string from a DOAJ application API result."""
+    admin = result.get("admin") or {}
+    status = admin.get("application_status")
+    return status.lower().strip() if isinstance(status, str) else ""
+
+
+def _fetch_applications_page(
+    session: requests.Session,
+    year: int,
+    api_key: str,
+    page: int,
+    page_size: int = 100,
+) -> Optional[dict]:
+    """Fetch one page of DOAJ applications created in the given year."""
+    query = f"created_date:[{year}-01-01 TO {year}-12-31]"
+    url = f"https://doaj.org/api/v3/search/applications/{quote(query)}"
+    try:
+        resp = session.get(
+            url,
+            params={"pageSize": page_size, "page": page, "api_key": api_key},
+            timeout=30,
+        )
+        if resp.status_code in (401, 403):
+            print(
+                f"  DOAJ Applications API: HTTP {resp.status_code} — check your API key.",
+                file=sys.stderr,
+            )
+            return None
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as exc:
+        print(
+            f"  DOAJ Applications API error (year={year}, page={page}): {exc}",
+            file=sys.stderr,
+        )
+        return None
+
+
+def _fetch_applications_for_year(
+    session: requests.Session, year: int, api_key: str
+) -> List[dict]:
+    """Fetch all DOAJ application records created in the given year (paginated)."""
+    page_size = 100
+    page = 1
+    collected: List[dict] = []
+    while True:
+        data = _fetch_applications_page(session, year, api_key, page, page_size)
+        if data is None:
+            break
+        results = data.get("results") or []
+        collected.extend(results)
+        total = int(data.get("total") or 0)
+        if not results or len(collected) >= total:
+            break
+        page += 1
+        time.sleep(0.05)
+    return collected
+
+
+def fetch_regional_applications(session: requests.Session, api_key: str) -> dict:
+    """Fetch per-year application stats for Africa and Latin America.
+
+    Returns a dict suitable for serialising to applications.json:
+      {
+        "fetched_at": "<iso-timestamp>",
+        "africa": {
+          "years": [...], "submitted": [...], "accepted": [...], "acceptance_pct": [...]
+        },
+        "latin_america": { ... }
+      }
+    """
+    if not api_key:
+        return {}
+
+    current_year = datetime.now(timezone.utc).year
+    start_year = 2003
+
+    africa_years: List[int] = []
+    africa_submitted: List[int] = []
+    africa_accepted: List[int] = []
+    africa_pct: List[Optional[float]] = []
+
+    latam_years: List[int] = []
+    latam_submitted: List[int] = []
+    latam_accepted: List[int] = []
+    latam_pct: List[Optional[float]] = []
+
+    print(
+        f"Fetching regional applications ({start_year}–{current_year})…",
+        file=sys.stderr,
+    )
+
+    auth_failed = False
+    for year in range(start_year, current_year + 1):
+        if auth_failed:
+            break
+        results = _fetch_applications_for_year(session, year, api_key)
+        # If the first year returned nothing at all (possible auth failure), stop.
+        if year == start_year and not results:
+            test = _fetch_applications_page(session, year, api_key, 1, 1)
+            if test is None:
+                auth_failed = True
+                break
+
+        af_sub = af_acc = la_sub = la_acc = 0
+        for result in results:
+            country = _get_application_country(result)
+            if not country:
+                continue
+            accepted = _get_application_status(result) == "accepted"
+            if country in AFRICA_ISO2:
+                af_sub += 1
+                if accepted:
+                    af_acc += 1
+            if country in LATAM_ISO2:
+                la_sub += 1
+                if accepted:
+                    la_acc += 1
+
+        africa_years.append(year)
+        africa_submitted.append(af_sub)
+        africa_accepted.append(af_acc)
+        africa_pct.append(round(af_acc / af_sub * 100, 1) if af_sub else None)
+
+        latam_years.append(year)
+        latam_submitted.append(la_sub)
+        latam_accepted.append(la_acc)
+        latam_pct.append(round(la_acc / la_sub * 100, 1) if la_sub else None)
+
+        print(
+            f"  {year}: Africa {af_sub} apps ({af_acc} accepted),"
+            f" LatAm {la_sub} apps ({la_acc} accepted)",
+            file=sys.stderr,
+        )
+
+    return {
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "africa": {
+            "years": africa_years,
+            "submitted": africa_submitted,
+            "accepted": africa_accepted,
+            "acceptance_pct": africa_pct,
+        },
+        "latin_america": {
+            "years": latam_years,
+            "submitted": latam_submitted,
+            "accepted": latam_accepted,
+            "acceptance_pct": latam_pct,
+        },
+    }
 
 
 def get_article_upload_years(issn: Optional[str], created_year: Optional[int]) -> dict:
@@ -870,6 +1061,23 @@ def main() -> int:
         )
 
     print(f"Wrote {journals_path} ({len(records)} records)")
+
+    applications_path = os.path.join(OUTPUT_DIR, "applications.json")
+    if DOAJ_API_KEY:
+        applications_data = fetch_regional_applications(session, DOAJ_API_KEY)
+        with open(applications_path, "w", encoding="utf-8") as handle:
+            json.dump(applications_data, handle, ensure_ascii=False)
+        print(f"Wrote {applications_path}")
+    else:
+        print(
+            "DOAJ_API_KEY not set — skipping applications data fetch.",
+            file=sys.stderr,
+        )
+        # Create an empty placeholder so the dashboard loads without errors.
+        if not os.path.exists(applications_path):
+            with open(applications_path, "w", encoding="utf-8") as handle:
+                json.dump({}, handle)
+
     return 0
 
 

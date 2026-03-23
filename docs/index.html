@@ -611,7 +611,6 @@
   <header>
     <div>
       <h1>DOAJ KPI Dashboard</h1>
-      <div class="muted subline">Data from DOAJ public data dump, updated monthly - <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a></div>
     </div>
     <div style="flex:1"></div>
     <div class="muted" id="meta-info">Loading…</div>
@@ -642,6 +641,19 @@
   </div>
 
   <div class="charts regional-charts">
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Latin America: Applications per year <span class="tooltip-icon" data-tooltip="Annual DOAJ applications submitted and accepted from Latin American journals, with acceptance rate. Submitted: hardcoded from DOAJ admin search (March 2026). Accepted: derived from the Growth in journals chart.">ⓘ</span></div>
+        <div class="chart-content" id="chart-latin-america-applications"></div>
+      </div>
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip accent"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Africa: Applications per year <span class="tooltip-icon" data-tooltip="Annual DOAJ applications submitted and accepted from African journals, with acceptance rate. Submitted: from AFRICA_APPLICATIONS_DATA secret (March 2026). Accepted: derived from the Growth in journals chart.">ⓘ</span></div>
+        <div class="chart-content" id="chart-africa-applications"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
         <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>No APC journals by year <span class="tooltip-icon" data-tooltip="Journals with no article processing charges (APC). Note: the actual percentages of journals charging fees may be slightly higher. Chart is based on apc_has field only, as has_other_charges is not available in our data export.">ⓘ</span></div>
@@ -661,13 +673,11 @@
 
 
   <footer class="site-footer">
-
-
-
-
-  <footer class="site-footer">
     <div class="footer-row">
-      <div>&copy; Brendan O'Connell, based on <a href="https://github.com/ikhwan-arief/doaj">DOAJ dashboard</a> by Ikhwan Arief, Universitas Andalas. <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA</a>. Data source: <a href="https://doaj.org/docs/public-data-dump/" target="_blank" rel="noopener noreferrer">DOAJ</a></div>
+      <div>Journal data from <a href="https://doaj.org/docs/public-data-dump/" target="_blank" rel="noopener noreferrer">DOAJ public data dump</a>, updated monthly &ndash; <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a>. Applications data from DOAJ Admin area and is not publicly available.</div>
+    </div>
+    <div class="footer-row">
+      <div>&copy; Brendan O'Connell, based on <a href="https://github.com/ikhwan-arief/doaj">DOAJ dashboard</a> by Ikhwan Arief, Universitas Andalas. <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA</a>.</div>
     </div>
   </footer>
 
@@ -701,7 +711,8 @@
       yearBounds: null,
       tablePage: 1,
       tablePageSize: 50,
-      searchTerms: []
+      searchTerms: [],
+      applications: null
     };
     const NOT_AVAILABLE = 'Not available';
     const FX_ENDPOINTS = [
@@ -2024,10 +2035,11 @@
     }
 
     async function loadData() {
-      const [journalsRes, aggRes, metaRes] = await Promise.all([
+      const [journalsRes, aggRes, metaRes, appsRes] = await Promise.all([
         loadJsonOrNull('data/journals.json'),
         loadJsonOrNull('data/aggregates.json'),
-        loadJsonOrNull('data/meta.json')
+        loadJsonOrNull('data/meta.json'),
+        loadJsonOrNull('data/applications.json')
       ]);
 
       if (!Array.isArray(journalsRes) || journalsRes.length === 0) {
@@ -2036,6 +2048,7 @@
         state.aggregates = aggRes || {};
         state.meta = metaRes || {};
         state.chartScale = {};
+        state.applications = appsRes || null;
         setStatus('Data is not available yet. Trigger the "Fetch DOAJ journals (hourly)" GitHub Action, then refresh this page.');
         renderAll();
         return;
@@ -2045,6 +2058,7 @@
       state.filtered = journalsRes;
       state.aggregates = aggRes || {};
       state.meta = metaRes || {};
+      state.applications = appsRes || null;
       state.chartScale = computeChartScales(state.records);
       state.tablePage = 1;
       buildSearchTerms(state.records);
@@ -2387,6 +2401,132 @@
       setTimeout(resizeMapPlot, 220);
     }
 
+    function renderRegionalApplicationsChart(chartId, acceptStatId, ytdStatId, regionData, title, color) {
+      const noDataMsg = 'No applications data. Add DOAJ_API_KEY to fetch this data.';
+      if (!regionData || !Array.isArray(regionData.years) || !regionData.years.length) {
+        Plotly.newPlot(
+          chartId, [],
+          {
+            paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#282624' }, xaxis: { visible: false }, yaxis: { visible: false },
+            annotations: [{ text: noDataMsg, showarrow: false, xref: 'paper', yref: 'paper', x: 0.5, y: 0.5, font: { color: '#5C5956' } }]
+          },
+          { displayModeBar: false }
+        );
+        return;
+      }
+
+      // Populate stats for YTD 2026 and acceptance rate for last full year (2025).
+      const lastFullYear = 2025;
+      const lastYearIdx = regionData.years.indexOf(lastFullYear);
+      if (lastYearIdx >= 0) {
+        const pct = regionData.acceptance_pct[lastYearIdx];
+        const el = document.getElementById(acceptStatId);
+        if (el) el.textContent = pct !== null ? `${pct}%` : '–';
+      }
+      const ytdYear = 2026;
+      const ytdIdx = regionData.years.indexOf(ytdYear);
+      if (ytdIdx >= 0) {
+        const el = document.getElementById(ytdStatId);
+        if (el) el.textContent = regionData.submitted[ytdIdx] > 0 ? formatNumber(regionData.submitted[ytdIdx]) : '–';
+      }
+
+      // Only show complete years (up to 2025) in the chart.
+      const chartYears = regionData.years.filter(y => y <= 2025);
+      const toIdx = y => regionData.years.indexOf(y);
+      const submitted = chartYears.map(y => regionData.submitted[toIdx(y)]);
+      const accepted  = chartYears.map(y => regionData.accepted[toIdx(y)]);
+      const rejected  = submitted.map((s, i) => s - accepted[i]);
+      const pcts      = chartYears.map(y => {
+        const p = regionData.acceptance_pct[toIdx(y)];
+        return p !== null && p !== undefined ? p : null;
+      });
+
+      const maxSubmitted = Math.max(...submitted, 1);
+
+      Plotly.newPlot(
+        chartId,
+        [{
+          type: 'bar', name: 'Accepted', x: chartYears, y: accepted,
+          marker: { color },
+          customdata: submitted.map((s, i) => ({ sub: s, acc: accepted[i], pct: pcts[i] })),
+          hovertemplate: 'Year %{x}<br>Accepted: %{y:,d}<br>Submitted: %{customdata.sub:,d}<extra></extra>'
+        }, {
+          type: 'bar', name: 'Not accepted / pending', x: chartYears, y: rejected,
+          marker: { color: '#D7D2CE' },
+          customdata: submitted.map((s, i) => ({ sub: s, rej: rejected[i] })),
+          hovertemplate: 'Year %{x}<br>Not accepted / pending: %{customdata.rej:,d}<br>Submitted: %{customdata.sub:,d}<extra></extra>'
+        }, {
+          type: 'scatter', mode: 'lines+markers', name: 'Acceptance %',
+          x: chartYears, y: pcts,
+          yaxis: 'y2',
+          line: { color: '#282624', width: 2, dash: 'dot' },
+          marker: { size: 5, color: '#282624' },
+          hovertemplate: 'Year %{x}<br>Acceptance rate: %{y:.1f}%<extra></extra>'
+        }],
+        {
+          barmode: 'stack',
+          margin: { l: 52, r: 56, t: 20, b: 58 },
+          paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: '#282624' },
+          xaxis: { tickformat: 'd', dtick: 2 },
+          yaxis: { tickformat: ',d', separatethousands: true, range: [0, maxSubmitted * 1.18] },
+          yaxis2: {
+            overlaying: 'y', side: 'right', range: [0, 100],
+            tickformat: '.0f', ticksuffix: '%', showgrid: false
+          },
+          legend: { orientation: 'h', x: 0, y: -0.22 }
+        },
+        { displayModeBar: false }
+      );
+    }
+
+    function renderApplicationsCharts(laGrowthData, afGrowthData) {
+
+      // Submitted applications from LATAM_APPLICATIONS_DATA secret (injected via config.js by GitHub Actions).
+      // Accepted = journals added per year from the Growth in journals chart (laGrowthData).
+      const LATAM_SUBMITTED = window.LATAM_APPLICATIONS_DATA;
+      let latAmRegionData = null;
+      if (LATAM_SUBMITTED && laGrowthData && Array.isArray(laGrowthData.years) && laGrowthData.years.length) {
+        const years = Object.keys(LATAM_SUBMITTED).map(Number).sort((a, b) => a - b);
+        const submitted = years.map(y => LATAM_SUBMITTED[y]);
+        const accepted = years.map(y => {
+          const idx = laGrowthData.years.indexOf(y);
+          return idx >= 0 ? laGrowthData.counts[idx] : 0;
+        });
+        const acceptance_pct = submitted.map((s, i) => s > 0 ? Math.round(accepted[i] / s * 100) : null);
+        latAmRegionData = { years, submitted, accepted, acceptance_pct };
+      }
+
+      // Submitted applications from AFRICA_APPLICATIONS_DATA secret (injected via config.js by GitHub Actions).
+      // Accepted = journals added per year from the Growth in journals chart (afGrowthData).
+      const AFRICA_SUBMITTED = window.AFRICA_APPLICATIONS_DATA;
+      let africaRegionData = null;
+      if (AFRICA_SUBMITTED && afGrowthData && Array.isArray(afGrowthData.years) && afGrowthData.years.length) {
+        const years = Object.keys(AFRICA_SUBMITTED).map(Number).sort((a, b) => a - b);
+        const submitted = years.map(y => AFRICA_SUBMITTED[y]);
+        const accepted = years.map(y => {
+          const idx = afGrowthData.years.indexOf(y);
+          return idx >= 0 ? afGrowthData.counts[idx] : 0;
+        });
+        const acceptance_pct = submitted.map((s, i) => s > 0 ? Math.round(accepted[i] / s * 100) : null);
+        africaRegionData = { years, submitted, accepted, acceptance_pct };
+      }
+
+      renderRegionalApplicationsChart(
+        'chart-latin-america-applications',
+        'latin-america-accept-pct', 'latin-america-apps-ytd',
+        latAmRegionData,
+        'Latin America: Applications per year', '#47A178'
+      );
+      renderRegionalApplicationsChart(
+        'chart-africa-applications',
+        'africa-accept-pct', 'africa-apps-ytd',
+        africaRegionData,
+        'Africa: Applications per year', '#FA9A87'
+      );
+    }
+
     function renderCharts() {
       if (!state.filtered.length) {
         renderEmptyCharts();
@@ -2623,6 +2763,8 @@
           { displayModeBar: false }
         );
       }
+
+      renderApplicationsCharts(laData, afData);
 
       // Render no-fee journals timeline
       const noFeeData = buildNoFeeTimeline(state.filtered);
@@ -2862,7 +3004,13 @@
       document.getElementById('africa-total').textContent = '–';
       document.getElementById('africa-ytd').textContent = '–';
       document.getElementById('africa-yoy').textContent = '–';
+      document.getElementById('latin-america-apps-ytd').textContent = '–';
+      document.getElementById('latin-america-accept-pct').textContent = '–';
+      document.getElementById('africa-apps-ytd').textContent = '–';
+      document.getElementById('africa-accept-pct').textContent = '–';
       
+      renderApplicationsCharts();
+
       const apcCurrency = getSelectedApcCurrency();
       renderApcCountryChart(
         'chart-apc-distribution',
@@ -3174,7 +3322,6 @@
 
     init();
 
-    // Password protection
     // Password is loaded from config.js (generated by GitHub Actions with secret)
     
     function checkPassword() {
