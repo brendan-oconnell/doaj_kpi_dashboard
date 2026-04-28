@@ -667,7 +667,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>No APC journals by year <span class="tooltip-icon" data-tooltip="Journals with no article processing charges (APC). Note: the actual percentages of journals charging fees may be slightly higher. Chart is based on apc_has field only, as has_other_charges is not available in our data export.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>No APC journals over time <span class="tooltip-icon" data-tooltip="Journals with no article processing charges (APC). Note: the actual percentages of journals charging fees may be slightly higher. Chart is based on apc_has field only, as has_other_charges is not available in our data export.">ⓘ</span></div>
         <div class="chart-content" id="chart-no-fee-timeline"></div>
       </div>
     </div>
@@ -3166,7 +3166,7 @@
       emptyCharts.forEach(([id, title]) => renderHorizontalBarChart(id, title, []));
       
       // Clear No APC chart
-      renderNoDataChart('chart-no-fee-timeline', 'No APC journals by year');
+      renderNoDataChart('chart-no-fee-timeline', 'No APC journals over time');
       
       // Clear last-updated chart
       renderNoDataChart('chart-last-updated-timeline', 'Journals not updated in 730+ days');
