@@ -685,7 +685,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals that uploaded article metadata in last calendar year <span class="tooltip-icon" data-tooltip="For each year, the % of DOAJ journals created in that year that uploaded article metadata in the most recent full calendar year.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals created in a given year that uploaded article metadata in the last calendar year (e.g. 2025) <span class="tooltip-icon" data-tooltip="For each year, the % of DOAJ journals created in that year that uploaded article metadata in the most recent full calendar year.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -2872,7 +2872,7 @@
       const noFeeData = buildNoFeeTimeline(state.filtered);
       
       if (!noFeeData.years.length) {
-        renderNoDataChart('chart-no-fee-timeline', 'No APC journals by year');
+        renderNoDataChart('chart-no-fee-timeline', 'No APC journals over time');
       } else {
         const noFeePercentages = noFeeData.totalCounts.map((total, idx) =>
           total > 0 ? ((noFeeData.noFeeCounts[idx] / total) * 100).toFixed(1) : 0
@@ -2931,10 +2931,10 @@
             yaxis: 'y2',
             line: { color: '#282624', width: 2, dash: 'dot' },
             marker: { size: 5, color: '#282624' },
-            hovertemplate: 'Year %{x}<br>%{y:.1f}% of journals are No APC<extra></extra>'
+            hovertemplate: 'Year %{x}<br>%{y:.1f}% of all journals in DOAJ are No APC<extra></extra>'
           }],
           {
-            title: 'No APC journals by year',
+            title: 'No APC journals over time',
             barmode: 'stack',
             margin: { l: 52, r: 56, t: 46, b: 58 },
             paper_bgcolor: 'rgba(0,0,0,0)',
