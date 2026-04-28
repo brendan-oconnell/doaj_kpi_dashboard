@@ -1457,7 +1457,7 @@
       const counts = [];
       const totals = [];
 
-      for (let Y = minCreatedYear; Y <= maxCreatedYear; Y++) {
+      for (let Y = minCreatedYear; Y <= Math.min(maxCreatedYear, lastFullYear); Y++) {
         let total = 0;
         let withUpdate = 0;
         for (const record of records || []) {
