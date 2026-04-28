@@ -685,7 +685,7 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals with updated article metadata in last year <span class="tooltip-icon" data-tooltip="For each year, the % of DOAJ journals created in that year that uploaded article metadata in the most recent full calendar year.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals that uploaded article metadata in last calendar year <span class="tooltip-icon" data-tooltip="For each year, the % of DOAJ journals created in that year that uploaded article metadata in the most recent full calendar year.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -1396,6 +1396,7 @@
       // For each creation year, count how many journals are currently stale
       // (last_updated > 730 days ago from now).
       const now = new Date();
+      const maxCreationYear = now.getUTCFullYear() - 3;
       const threshold = new Date(now);
       threshold.setDate(threshold.getDate() - 730);
       const yearData = {};
@@ -1403,7 +1404,7 @@
       for (const record of records || []) {
         if (!record || !record.created_date) continue;
         const year = new Date(record.created_date).getUTCFullYear();
-        if (Number.isNaN(year) || year > 2023 || year < 2005) continue;
+        if (Number.isNaN(year) || year > maxCreationYear || year < 2002) continue;
         if (!yearData[year]) yearData[year] = { total: 0, stale: 0 };
         yearData[year].total++;
         if (record.last_updated) {
@@ -1420,7 +1421,7 @@
       const freshCounts = [];
       const stalePercentages = [];
 
-      for (let y = 2005; y <= 2023; y++) {
+      for (let y = 2002; y <= maxCreationYear; y++) {
         const d = yearData[y] || { total: 0, stale: 0 };
         if (d.total === 0) continue;
         years.push(y);
