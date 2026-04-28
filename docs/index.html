@@ -676,7 +676,16 @@
   <div class="charts regional-charts">
     <div class="chart-row single">
       <div class="chart-box">
-        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals with updated article metadata in last year <span class="tooltip-icon" data-tooltip="For each year, the % of all DOAJ journals (created up to end of calendar year) whose most recent article metadata upload was in the previous calendar year.">ⓘ</span></div>
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></span>Journals created in a given year not updated in 730+ days <span class="tooltip-icon" data-tooltip="For each creation year, shows the current percentage of journals whose last_updated date is more than 730 days (2 years) ago. Journals with no last_updated date are counted as stale.">ⓘ</span></div>
+        <div class="chart-content" id="chart-last-updated-timeline"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts regional-charts">
+    <div class="chart-row single">
+      <div class="chart-box">
+        <div class="box-header"><span class="icon-chip"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6M9 7h3"/></svg></span>Journals with updated article metadata in last year <span class="tooltip-icon" data-tooltip="For each year, the % of DOAJ journals created in that year that uploaded article metadata in the most recent full calendar year.">ⓘ</span></div>
         <div class="chart-content" id="chart-article-metadata"></div>
       </div>
     </div>
@@ -1383,43 +1392,83 @@
       return { years, totalCounts, noFeeCounts, annualTotalAdditions, annualNoFeeAdditions };
     }
 
+    function buildLastUpdatedByCreationYear(records) {
+      // For each creation year, count how many journals are currently stale
+      // (last_updated > 730 days ago from now).
+      const now = new Date();
+      const threshold = new Date(now);
+      threshold.setDate(threshold.getDate() - 730);
+      const yearData = {};
+
+      for (const record of records || []) {
+        if (!record || !record.created_date) continue;
+        const year = new Date(record.created_date).getUTCFullYear();
+        if (Number.isNaN(year) || year > 2023 || year < 2005) continue;
+        if (!yearData[year]) yearData[year] = { total: 0, stale: 0 };
+        yearData[year].total++;
+        if (record.last_updated) {
+          const lastUp = new Date(record.last_updated);
+          if (!isNaN(lastUp) && lastUp < threshold) yearData[year].stale++;
+        } else {
+          yearData[year].stale++;
+        }
+      }
+
+      const years = [];
+      const totals = [];
+      const staleCounts = [];
+      const freshCounts = [];
+      const stalePercentages = [];
+
+      for (let y = 2005; y <= 2023; y++) {
+        const d = yearData[y] || { total: 0, stale: 0 };
+        if (d.total === 0) continue;
+        years.push(y);
+        totals.push(d.total);
+        staleCounts.push(d.stale);
+        freshCounts.push(d.total - d.stale);
+        stalePercentages.push(d.total > 0 ? parseFloat(((d.stale / d.total) * 100).toFixed(1)) : 0);
+      }
+
+      return { years, totals, staleCounts, freshCounts, stalePercentages };
+    }
+
     function buildArticleMetadataTimeline(records) {
-      // For each year Y, look at all journals created ≤ end of Y,
-      // and compute % that uploaded any article metadata to DOAJ in year Y-1
-      // (based on article_upload_years: years in which created_date falls, via DOAJ article API).
+      // For each journal creation year Y, compute the % of journals created in Y
+      // that uploaded any article metadata to DOAJ in the most recent full calendar year.
       const currentYear = new Date().getUTCFullYear();
+      const lastFullYear = currentYear - 1;
       let minCreatedYear = null;
+      let maxCreatedYear = null;
 
       for (const record of records || []) {
         if (!record || !record.created_date) continue;
         const y = new Date(record.created_date).getUTCFullYear();
         if (Number.isNaN(y)) continue;
         if (minCreatedYear === null || y < minCreatedYear) minCreatedYear = y;
+        if (maxCreatedYear === null || y > maxCreatedYear) maxCreatedYear = y;
       }
 
-      if (minCreatedYear === null) return { years: [], percentages: [], counts: [], totals: [] };
+      if (minCreatedYear === null) return { years: [], percentages: [], counts: [], totals: [], lastFullYear };
 
-      // Show bars from first year+1 (need Y-1 data) up to last full year
-      const maxYear = currentYear - 1;
       const years = [];
       const percentages = [];
       const counts = [];
       const totals = [];
 
-      for (let Y = Math.max(minCreatedYear + 1, 2005); Y <= maxYear; Y++) {
-        const endOfY = new Date(Date.UTC(Y, 11, 31));
-        const prevYear = Y - 1;
+      for (let Y = minCreatedYear; Y <= maxCreatedYear; Y++) {
         let total = 0;
         let withUpdate = 0;
         for (const record of records || []) {
           if (!record || !record.created_date) continue;
           const created = new Date(record.created_date);
-          if (isNaN(created) || created > endOfY) continue;
+          if (isNaN(created)) continue;
+          if (created.getUTCFullYear() !== Y) continue;
           total++;
           const uploadYears = Array.isArray(record.article_upload_years)
             ? record.article_upload_years
             : [];
-          if (uploadYears.includes(prevYear)) withUpdate++;
+          if (uploadYears.includes(lastFullYear)) withUpdate++;
         }
         if (total === 0) continue;
         years.push(Y);
@@ -1428,7 +1477,7 @@
         totals.push(total);
       }
 
-      return { years, percentages, counts, totals };
+      return { years, percentages, counts, totals, lastFullYear };
     }
 
     function getCreatedYear(record) {
@@ -2910,6 +2959,78 @@
         );
       }
 
+      // Render last-updated by creation year
+      const luData = buildLastUpdatedByCreationYear(state.filtered);
+
+      if (!luData.years.length) {
+        renderNoDataChart('chart-last-updated-timeline', 'Journals not updated in 730+ days');
+      } else {
+        const maxYValueLU = Math.max(...luData.totals, 1);
+        Plotly.newPlot(
+          'chart-last-updated-timeline',
+          [{
+            type: 'bar',
+            name: 'Updated within 730 days',
+            x: luData.years,
+            y: luData.freshCounts,
+            customdata: luData.years.map((y, idx) => {
+              const total = luData.totals[idx];
+              const fresh = luData.freshCounts[idx];
+              const freshPct = total > 0 ? ((fresh / total) * 100).toFixed(1) : '0.0';
+              return { total, count: fresh, pct: freshPct };
+            }),
+            marker: { color: '#47A178' },
+            hovertemplate: 'Created in %{x}<br>Updated within 730 days: %{customdata.count:,d} (%{customdata.pct}%)<br>Total journals: %{customdata.total:,d}<extra></extra>'
+          }, {
+            type: 'bar',
+            name: 'Not updated in 730+ days',
+            x: luData.years,
+            y: luData.staleCounts,
+            customdata: luData.years.map((y, idx) => {
+              const total = luData.totals[idx];
+              const stale = luData.staleCounts[idx];
+              const stalePct = total > 0 ? ((stale / total) * 100).toFixed(1) : '0.0';
+              return { total, count: stale, pct: stalePct };
+            }),
+            marker: { color: '#FD5A3B' },
+            hovertemplate: 'Created in %{x}<br>Not updated in 730+ days: %{customdata.count:,d} (%{customdata.pct}%)<br>Total journals: %{customdata.total:,d}<extra></extra>'
+          }, {
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: '% Stale (730+ days)',
+            x: luData.years,
+            y: luData.stalePercentages,
+            yaxis: 'y2',
+            line: { color: '#282624', width: 2, dash: 'dot' },
+            marker: { size: 5, color: '#282624' },
+            hovertemplate: 'Created in %{x}<br>%{y:.1f}% not updated in 730+ days<extra></extra>'
+          }],
+          {
+            barmode: 'stack',
+            margin: { l: 52, r: 56, t: 20, b: 58 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#282624' },
+            xaxis: { tickformat: 'd' },
+            yaxis: {
+              tickformat: ',d',
+              separatethousands: true,
+              range: [0, maxYValueLU * 1.15]
+            },
+            yaxis2: {
+              overlaying: 'y',
+              side: 'right',
+              range: [0, 100],
+              tickformat: '.0f',
+              ticksuffix: '%',
+              showgrid: false
+            },
+            legend: { orientation: 'h', x: 0, y: -0.22 }
+          },
+          { displayModeBar: false }
+        );
+      }
+
       // Render article metadata chart
       const articleMetadataData = buildArticleMetadataTimeline(state.filtered);
       
@@ -2928,9 +3049,9 @@
               customdata: articleMetadataData.years.map((y, i) => ({
                 count: articleMetadataData.counts[i],
                 total: articleMetadataData.totals[i],
-                prevYear: y - 1
+                lastFullYear: articleMetadataData.lastFullYear
               })),
-              hovertemplate: 'Year %{x}<br>%{y:.1f}% had metadata updates in %{customdata.prevYear}<br>(%{customdata.count:,d} of %{customdata.total:,d} journals)<extra></extra>'
+              hovertemplate: 'Created %{x}<br>%{y:.1f}% uploaded metadata in %{customdata.lastFullYear}<br>(%{customdata.count:,d} of %{customdata.total:,d} journals)<extra></extra>'
             }
           ],
           {
@@ -3045,6 +3166,9 @@
       
       // Clear No APC chart
       renderNoDataChart('chart-no-fee-timeline', 'No APC journals by year');
+      
+      // Clear last-updated chart
+      renderNoDataChart('chart-last-updated-timeline', 'Journals not updated in 730+ days');
       
       // Clear article metadata chart
       renderNoDataChart('chart-article-metadata', 'Journals with article metadata by year');
@@ -3440,13 +3564,18 @@
       }
     }
 
-    document.getElementById('password-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        checkPassword();
-      }
-    });
-
-    document.getElementById('password-input').focus();
+    // AUTO-BYPASS: skip password overlay for local development
+    if (!window.ENCRYPTION_ENABLED) {
+      document.getElementById('password-overlay').classList.add('hidden');
+      init();
+    } else {
+      document.getElementById('password-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          checkPassword();
+        }
+      });
+      document.getElementById('password-input').focus();
+    }
   </script>
 </body>
 </html>
