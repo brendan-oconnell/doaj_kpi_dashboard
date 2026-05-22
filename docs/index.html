@@ -2366,7 +2366,7 @@
       _setKpi('kpi-languages', formatNumber(languages.size));
       _setKpi('kpi-no-apc', formatNumber(noApc));
 
-      const metaText = `Source last updated: ${formatDate(state.meta.source_last_updated_max)}`;
+      const metaText = `Data last fetched: ${formatDate(state.meta.fetched_at)}`;
       document.getElementById('meta-info').textContent = metaText;
       renderFxSourceNote();
       renderCountryTopSubjects();
